@@ -35,6 +35,31 @@
  * 2) This allows position lock within 180° worst case instead of full 720°
  */
 
+void _4PLUS2_CRANK_PULSE(TriggerWaveform *s, int idx, float crankToothAngle, float toothWidth) 
+{
+	s->addEvent720((((crankToothAngle) * (idx)) - (toothWidth)), TriggerValue::RISE, TriggerWheel::T_SECONDARY);
+	s->addEvent720(((crankToothAngle) * (idx)), TriggerValue::FALL, TriggerWheel::T_SECONDARY);
+#if EFI_UNIT_TEST
+	if (true /*printTriggerDebug*/)
+	{
+		printf(("Crank tooth #%02d, Angle %3.f°\n"), (idx), (crankToothAngle * (idx)));
+	}
+#endif
+}
+
+void _4PLUS2_CAM_PULSE(TriggerWaveform *s, int idx, float offset, float camToothAngle, float toothWidth)
+	{
+		s->addEvent720((((camToothAngle) * (idx)) + (offset) - (toothWidth)), TriggerValue::RISE, TriggerWheel::T_PRIMARY);
+		s->addEvent720((((camToothAngle) * (idx)) + (offset)), TriggerValue::FALL, TriggerWheel::T_PRIMARY);
+#if EFI_UNIT_TEST
+		if (true /*printTriggerDebug*/) 
+		{
+			printf("Cam   tooth #%02d, Angle %3.f°\n", idx, ((camToothAngle * (idx)) + (offset)));
+		}
+#endif
+					
+	}
+
 void initialize4Plus2(TriggerWaveform *s) {
 	s->initialize(FOUR_STROKE_CAM_SENSOR, SyncEdge::RiseOnly);
 
@@ -43,8 +68,9 @@ void initialize4Plus2(TriggerWaveform *s) {
 	float camOffset1 = 50.0f;
 	float camOffset2 = camOffset1 + 180.0f; // Second cam tooth 180 crank degrees after first
 	
-	// TDC position - first cam tooth is our reference point for sync
-	s->tdcPosition = 720.0f - camOffset1;
+	// TDC position - second cam tooth is our reference point for sync
+	s->tdcPosition = 720.0f - camOffset2;
+//	s->tdcPosition = 90;
 
 	// This trigger requires both crank and cam inputs
 	s->needSecondTriggerInput = true;
@@ -52,46 +78,24 @@ void initialize4Plus2(TriggerWaveform *s) {
 	// Crank teeth - secondary wheel for positioning
 	// 4 teeth per revolution, 90 degrees apart
 	// VR sensor - only rising edges are added as events
-	
+	int countCrankTooth = 4;
+	float crankToothAngle = (s->getCycleDuration()/2)/countCrankTooth;
+	float camToothAngle = 180;
 	float toothWidth = 5.0f;
-	
-	// First revolution (0-360 degrees)
-	s->addEvent720(0.0f, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
-	s->addEvent720(toothWidth, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
-	
-	s->addEvent720(90.0f, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
-	s->addEvent720(90.0f + toothWidth, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
-	
-	s->addEvent720(180.0f, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
-	s->addEvent720(180.0f + toothWidth, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
-	
-	s->addEvent720(270.0f, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
-	s->addEvent720(270.0f + toothWidth, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
-	
-	// Second revolution (360-720 degrees)
-	s->addEvent720(360.0f, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
-	s->addEvent720(360.0f + toothWidth, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
-	
-	s->addEvent720(450.0f, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
-	s->addEvent720(450.0f + toothWidth, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
-	
-	s->addEvent720(540.0f, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
-	s->addEvent720(540.0f + toothWidth, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
-	
-	s->addEvent720(630.0f, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
-	s->addEvent720(630.0f + toothWidth, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
+
+	int i;
+	// Cam tooth 1 at ~50 degrees after TDC
+	_4PLUS2_CAM_PULSE(s, 0, camOffset1, camToothAngle, toothWidth);
+	for(i=1; i<=2; i++)
+		_4PLUS2_CRANK_PULSE(s, i, crankToothAngle, toothWidth);
+
+	_4PLUS2_CAM_PULSE(s, 1, camOffset1, camToothAngle, toothWidth);
+	for(i=3; i<=8; i++)
+		_4PLUS2_CRANK_PULSE(s, i, crankToothAngle, toothWidth);
 
 	// Cam teeth - primary wheel for synchronization
 	// VR sensor - only rising edges matter for sync
 	
-	// Cam tooth 1 at ~50 degrees after TDC
-	s->addEvent720(camOffset1, TriggerValue::RISE, TriggerWheel::T_PRIMARY);
-	s->addEvent720(camOffset1 + toothWidth, TriggerValue::FALL, TriggerWheel::T_PRIMARY);
-	
-	// Cam tooth 2 at 180 crank degrees after first cam tooth
-	s->addEvent720(camOffset2, TriggerValue::RISE, TriggerWheel::T_PRIMARY);
-	s->addEvent720(camOffset2 + toothWidth, TriggerValue::FALL, TriggerWheel::T_PRIMARY);
-
 	// Enable fast sync by NOT using only primary for sync
 	// This allows the decoder to use the relationship between crank and cam teeth
 	s->useOnlyPrimaryForSync = false;
@@ -100,19 +104,19 @@ void initialize4Plus2(TriggerWaveform *s) {
 	// Gap between cam teeth: 180 degrees (2 crank teeth)
 	// Gap after second cam tooth back to first: 540 degrees (6 crank teeth)
 	// Ratio: 540/180 = 3.0
-	s->setTriggerSynchronizationGap2(1.5f, 4.5f);
+//	s->setTriggerSynchronizationGap2(1.5f, 4.5f);
 	
 	// Set secondary (crank) synchronization gap
 	// All crank teeth are equally spaced at 90 degrees
 	// This tells decoder: "crank teeth are all equal, use cam for sync"
 	// nominal gap = 1.0 (all gaps equal)
-	s->setSecondTriggerSynchronizationGap2(0.7f, 1.3f);
+//	s->setSecondTriggerSynchronizationGap2(0.6f, 1.4f);
 	
 	// Enable gap detection on third tooth for fast sync
 	// This allows pattern recognition: cam -> 2 cranks -> cam (short pattern)
 	//                             vs: cam -> 6 cranks -> cam (long pattern)
 	// Gap index 0: between cam teeth (short, 2 crank teeth) - nominal ratio ~1.0
 	// Gap index 1: long gap with 6 crank teeth - nominal ratio ~3.0
-	s->setTriggerSynchronizationGap3(/*gapIndex*/0, 0.5f, 1.5f);   // short cam gap
-	s->setTriggerSynchronizationGap3(/*gapIndex*/1, 2.0f, 5.0f);   // long cam gap
+	s->setTriggerSynchronizationGap3(/*gapIndex*/0, 0.25f, 0.75f);   // short cam gap
+	s->setTriggerSynchronizationGap3(/*gapIndex*/1, 1.5f, 3.5f);   // long cam gap
 }
