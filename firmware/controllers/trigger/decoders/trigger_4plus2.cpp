@@ -53,28 +53,44 @@ void initialize4Plus2(TriggerWaveform *s) {
 	// 4 teeth per revolution, 90 degrees apart
 	// VR sensor - only rising edges are added as events
 	
-	int toothWidth = 5;
+	float toothWidth = 5.0f;
 	
 	// First revolution (0-360 degrees)
-	s->addToothRiseFall(0.0f, toothWidth, TriggerWheel::T_SECONDARY);
-	s->addToothRiseFall(90.0f, toothWidth, TriggerWheel::T_SECONDARY);
-	s->addToothRiseFall(180.0f, toothWidth, TriggerWheel::T_SECONDARY);
-	s->addToothRiseFall(270.0f, toothWidth, TriggerWheel::T_SECONDARY);
+	s->addEvent720(0.0f, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
+	s->addEvent720(toothWidth, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
+	
+	s->addEvent720(90.0f, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
+	s->addEvent720(90.0f + toothWidth, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
+	
+	s->addEvent720(180.0f, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
+	s->addEvent720(180.0f + toothWidth, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
+	
+	s->addEvent720(270.0f, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
+	s->addEvent720(270.0f + toothWidth, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
 	
 	// Second revolution (360-720 degrees)
-	s->addToothRiseFall(360.0f, toothWidth, TriggerWheel::T_SECONDARY);
-	s->addToothRiseFall(450.0f, toothWidth, TriggerWheel::T_SECONDARY);
-	s->addToothRiseFall(540.0f, toothWidth, TriggerWheel::T_SECONDARY);
-	s->addToothRiseFall(630.0f, toothWidth, TriggerWheel::T_SECONDARY);
+	s->addEvent720(360.0f, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
+	s->addEvent720(360.0f + toothWidth, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
+	
+	s->addEvent720(450.0f, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
+	s->addEvent720(450.0f + toothWidth, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
+	
+	s->addEvent720(540.0f, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
+	s->addEvent720(540.0f + toothWidth, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
+	
+	s->addEvent720(630.0f, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
+	s->addEvent720(630.0f + toothWidth, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
 
 	// Cam teeth - primary wheel for synchronization
-	// VR sensor - only rising edges matter, but addToothRiseFall handles this
+	// VR sensor - only rising edges matter for sync
 	
 	// Cam tooth 1 at ~50 degrees after TDC
-	s->addToothRiseFall(camOffset1, toothWidth, TriggerWheel::T_PRIMARY);
+	s->addEvent720(camOffset1, TriggerValue::RISE, TriggerWheel::T_PRIMARY);
+	s->addEvent720(camOffset1 + toothWidth, TriggerValue::FALL, TriggerWheel::T_PRIMARY);
 	
 	// Cam tooth 2 at 180 crank degrees after first cam tooth
-	s->addToothRiseFall(camOffset2, toothWidth, TriggerWheel::T_PRIMARY);
+	s->addEvent720(camOffset2, TriggerValue::RISE, TriggerWheel::T_PRIMARY);
+	s->addEvent720(camOffset2 + toothWidth, TriggerValue::FALL, TriggerWheel::T_PRIMARY);
 
 	// Enable fast sync by NOT using only primary for sync
 	// This allows the decoder to use the relationship between crank and cam teeth
