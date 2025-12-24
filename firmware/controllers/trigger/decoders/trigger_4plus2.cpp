@@ -35,12 +35,16 @@
  * 2) This allows position lock within 180° worst case instead of full 720°
  */
 
+#if EFI_UNIT_TEST
+	extern bool printTriggerDebug;
+#endif
+
 void _4PLUS2_CRANK_PULSE(TriggerWaveform *s, int idx, float crankToothAngle, float toothWidth) 
 {
 	s->addEvent720((((crankToothAngle) * (idx)) - (toothWidth)), TriggerValue::RISE, TriggerWheel::T_SECONDARY);
 	s->addEvent720(((crankToothAngle) * (idx)), TriggerValue::FALL, TriggerWheel::T_SECONDARY);
 #if EFI_UNIT_TEST
-	if (true /*printTriggerDebug*/)
+	if (printTriggerDebug)
 	{
 		printf(("Crank tooth #%02d, Angle %3.f°\n"), (idx), (crankToothAngle * (idx)));
 	}
@@ -52,7 +56,7 @@ void _4PLUS2_CAM_PULSE(TriggerWaveform *s, int idx, float offset, float camTooth
 		s->addEvent720((((camToothAngle) * (idx)) + (offset) - (toothWidth)), TriggerValue::RISE, TriggerWheel::T_PRIMARY);
 		s->addEvent720((((camToothAngle) * (idx)) + (offset)), TriggerValue::FALL, TriggerWheel::T_PRIMARY);
 #if EFI_UNIT_TEST
-		if (true /*printTriggerDebug*/) 
+		if (printTriggerDebug) 
 		{
 			printf("Cam   tooth #%02d, Angle %3.f°\n", idx, ((camToothAngle * (idx)) + (offset)));
 		}
@@ -66,14 +70,7 @@ void initialize4Plus2(TriggerWaveform *s) {
 	// First cam tooth comes approximately 50 degrees after TDC #1
 	// Adjust this value based on actual cam sensor position (±15 degrees tolerance)
 	float camOffset1 = 50.0f;
-	float camOffset2 = camOffset1 + 180.0f; // Second cam tooth 180 crank degrees after first
-	
-	// TDC position - second cam tooth is our reference point for sync
-	s->tdcPosition = 720.0f - camOffset2;
-//	s->tdcPosition = 90;
-
-	// This trigger requires both crank and cam inputs
-	s->needSecondTriggerInput = true;
+	float camOffset2 = camOffset1 + 180.0f; // Second cam tooth 180 crank degrees after first	
 
 	// Crank teeth - secondary wheel for positioning
 	// 4 teeth per revolution, 90 degrees apart
@@ -83,22 +80,35 @@ void initialize4Plus2(TriggerWaveform *s) {
 	float camToothAngle = 180;
 	float toothWidth = 5.0f;
 
+	// TDC position - second cam tooth is our reference point for sync
+	// we are specifying the distance from reference point for sync to next TDC (in engine rotation direction)
+	s->tdcPosition = 720.0f - camOffset2 - toothWidth;
+
+	// This trigger requires both crank and cam inputs
+	s->needSecondTriggerInput = true;
+
+	// Enable fast sync by NOT using only primary for sync
+	// This allows the decoder to use the relationship between crank and cam teeth
+	s->useOnlyPrimaryForSync = false;
+	
+	// note: doublecheck this, although set to false, triggers.txt states the sync is needed
+	// may also started without engine phase being identified (wasted spark instead of full seq.) 
+	s->isSynchronizationNeeded = false; 	
+
 	int i;
 	// Cam tooth 1 at ~50 degrees after TDC
 	_4PLUS2_CAM_PULSE(s, 0, camOffset1, camToothAngle, toothWidth);
+	
 	for(i=1; i<=2; i++)
 		_4PLUS2_CRANK_PULSE(s, i, crankToothAngle, toothWidth);
 
 	_4PLUS2_CAM_PULSE(s, 1, camOffset1, camToothAngle, toothWidth);
+	
 	for(i=3; i<=8; i++)
 		_4PLUS2_CRANK_PULSE(s, i, crankToothAngle, toothWidth);
 
 	// Cam teeth - primary wheel for synchronization
 	// VR sensor - only rising edges matter for sync
-	
-	// Enable fast sync by NOT using only primary for sync
-	// This allows the decoder to use the relationship between crank and cam teeth
-	s->useOnlyPrimaryForSync = false;
 	
 	// Set synchronization gaps for cam teeth (primary wheel)
 	// Gap between cam teeth: 180 degrees (2 crank teeth)
