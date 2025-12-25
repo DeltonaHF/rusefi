@@ -39,26 +39,26 @@
 	extern bool printTriggerDebug;
 #endif
 
-void _4PLUS2_CRANK_PULSE(TriggerWaveform *s, int idx, float crankToothAngle, float toothWidth) 
+void _4PLUS2_CRANK_PULSE(TriggerWaveform *s, unsigned idx, unsigned crankToothAngle, unsigned toothWidth) 
 {
 	s->addEvent720((((crankToothAngle) * (idx)) - (toothWidth)), TriggerValue::RISE, TriggerWheel::T_SECONDARY);
 	s->addEvent720(((crankToothAngle) * (idx)), TriggerValue::FALL, TriggerWheel::T_SECONDARY);
 #if EFI_UNIT_TEST
 	if (printTriggerDebug)
 	{
-		printf(("Crank tooth #%02d, Angle %3.f°\n"), (idx), (crankToothAngle * (idx)));
+		printf(("Crank tooth #%02d, Angle %3.u°\n"), (idx), (crankToothAngle * (idx)));
 	}
 #endif
 }
 
-void _4PLUS2_CAM_PULSE(TriggerWaveform *s, int idx, float offset, float camToothAngle, float toothWidth)
+void _4PLUS2_CAM_PULSE(TriggerWaveform *s, unsigned idx, unsigned offset, unsigned camToothAngle, unsigned toothWidth)
 	{
 		s->addEvent720((((camToothAngle) * (idx)) + (offset) - (toothWidth)), TriggerValue::RISE, TriggerWheel::T_PRIMARY);
 		s->addEvent720((((camToothAngle) * (idx)) + (offset)), TriggerValue::FALL, TriggerWheel::T_PRIMARY);
 #if EFI_UNIT_TEST
 		if (printTriggerDebug) 
 		{
-			printf("Cam   tooth #%02d, Angle %3.f°\n", idx, ((camToothAngle * (idx)) + (offset)));
+			printf("Cam   tooth #%02d, Angle %3.u°\n", idx, ((camToothAngle * (idx)) + (offset)));
 		}
 #endif
 					
@@ -69,20 +69,20 @@ void initialize4Plus2(TriggerWaveform *s) {
 
 	// First cam tooth comes approximately 50 degrees after TDC #1
 	// Adjust this value based on actual cam sensor position (±15 degrees tolerance)
-	float camOffset1 = 50.0f;
-	float camOffset2 = camOffset1 + 180.0f; // Second cam tooth 180 crank degrees after first	
+	unsigned camOffset1 = 50;
+	unsigned camOffset2 = camOffset1 + 180; // Second cam tooth 180 crank degrees after first	
 
 	// Crank teeth - secondary wheel for positioning
 	// 4 teeth per revolution, 90 degrees apart
 	// VR sensor - only rising edges are added as events
 	int countCrankTooth = 4;
-	float crankToothAngle = (s->getCycleDuration()/2)/countCrankTooth;
-	float camToothAngle = 180;
-	float toothWidth = 5.0f;
+	unsigned crankToothAngle = (s->getCycleDuration()/2)/countCrankTooth;
+	unsigned camToothAngle = 180;
+	unsigned toothWidth = 5;
 
 	// TDC position - second cam tooth is our reference point for sync
 	// we are specifying the distance from reference point for sync to next TDC (in engine rotation direction)
-	s->tdcPosition = 720.0f - camOffset2 - toothWidth;
+	s->tdcPosition = 720 - camOffset2 /* - toothWidth */;
 
 	// This trigger requires both crank and cam inputs
 	s->needSecondTriggerInput = true;
