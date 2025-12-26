@@ -100,5 +100,7 @@ public enum trigger_type_e {
 	TT_JEEP_EVD_36_2_2,
 	TT_JEEPRENIX_66_2_2_2,
 	TT_SUBARU_7_6_CRANK,
+	TT_4_PLUS_2,
+	TT_4_PLUS_1,
 	TT_UNUSED,
 }

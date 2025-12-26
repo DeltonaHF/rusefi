@@ -100,6 +100,8 @@ public class TriggerImage {
                 return "60/2";
             case TT_GM_60_2_2_2:
                 return "GM 60/2/2/2";
+            case TT_4_PLUS_2:
+                return "IAW 4 crank + 2 cam";
         }
         return triggerName.getTriggerName();
     }
