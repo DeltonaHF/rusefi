@@ -75,7 +75,7 @@ void initialize4Plus2(TriggerWaveform *s) {
 	// Crank teeth - secondary wheel for positioning
 	// 4 teeth per revolution, 90 degrees apart
 	// VR sensor - only rising edges are added as events
-	int countCrankTooth = 4;
+	unsigned countCrankTooth = 4;
 	unsigned crankToothAngle = (s->getCycleDuration()/2)/countCrankTooth;
 	unsigned camToothAngle = 180;
 	unsigned toothWidth = 5;

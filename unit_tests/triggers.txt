@@ -13,7 +13,7 @@ isSynchronizationNeeded=0
 gapFrom.0=1.500000
 gapTo.0=2.500000
 # end of meta section
-event 0 0 1 0.00 3.000000
+event 0 0 1 0.00 0.000000
 event 1 1 1 0.00 nan
 event 2 1 0 52.76 nan
 event 3 1 1 52.76 nan
@@ -6539,3 +6539,69 @@ event 20 0 1 595.00 nan
 event 21 0 0 595.00 nan
 event 22 0 1 688.00 nan
 event 23 0 0 688.00 nan
+TRIGGERTYPE 95 20 TT_4_PLUS_2 490.00
+knownOperationMode=true
+crankBased=false
+hasSecondChannel=true
+isSecondWheelCam=false
+cycleDuration=720
+gapsCount=2
+syncEdge=RiseOnly
+isSynchronizationNeeded=1
+gapFrom.0=0.250000
+gapTo.0=0.750000
+gapFrom.1=1.500000
+gapTo.1=3.500000
+# end of meta section
+event 0 0 1 0.00 0.555556
+event 1 0 0 0.00 nan
+event 2 1 1 40.00 0.799964
+event 3 1 0 40.00 nan
+event 4 1 1 130.00 2.250056
+event 5 1 0 130.00 nan
+event 6 1 1 220.00 1.000000
+event 7 1 0 220.00 nan
+event 8 1 1 310.00 1.000000
+event 9 1 0 310.00 nan
+event 10 1 1 400.00 1.000011
+event 11 1 0 400.00 nan
+event 12 1 1 490.00 0.999989
+event 13 1 0 490.00 nan
+event 14 0 1 540.00 0.555556
+event 15 0 0 540.00 nan
+event 16 1 1 580.00 0.800000
+event 17 1 0 580.00 nan
+event 18 1 1 670.00 2.250000
+event 19 1 0 670.00 nan
+TRIGGERTYPE 96 20 TT_4_PLUS_1 360.00
+knownOperationMode=true
+crankBased=true
+hasSecondChannel=false
+isSecondWheelCam=false
+cycleDuration=360
+gapsCount=1
+syncEdge=RiseOnly
+isSynchronizationNeeded=1
+gapFrom.0=0.293333
+gapTo.0=0.666667
+# end of meta section
+event 0 0 1 0.00 0.444444
+event 1 0 0 0.00 nan
+event 2 0 1 50.00 1.250000
+event 3 0 0 50.00 nan
+event 4 0 1 140.00 1.800000
+event 5 0 0 140.00 nan
+event 6 0 1 230.00 1.000000
+event 7 0 0 230.00 nan
+event 8 0 1 320.00 1.000000
+event 9 0 0 320.00 nan
+event 10 0 1 360.00 nan
+event 11 0 0 360.00 nan
+event 12 0 1 410.00 nan
+event 13 0 0 410.00 nan
+event 14 0 1 500.00 nan
+event 15 0 0 500.00 nan
+event 16 0 1 590.00 nan
+event 17 0 0 590.00 nan
+event 18 0 1 680.00 nan
+event 19 0 0 680.00 nan
