@@ -39,7 +39,7 @@
 #include "trigger_universal.h"
 #include "trigger_mercedes.h"
 #include "trigger_4plus2.h"
-#include "trigger_4plus1.h"
+#include "trigger_generalized.h"
 #include "engine_state.h"
 
 void wrapAngle(angle_t& angle, const char* msg, ObdCode code) {
@@ -278,7 +278,7 @@ void TriggerWaveform::addEvent(angle_t angle, TriggerValue const state, TriggerW
 
 #if EFI_UNIT_TEST
 	if (printTriggerDebug) {
-		printf("addEvent2 %.2f i=%d front=%d\r\n", angle, channelIndex, state);
+		printf("addEvent2 (# %2d) %.3f (%5.1f°) i=%d front=%d\r\n", wave.phaseCount, angle, angle * getCycleDuration(), channelIndex, state);
 	}
 #endif
 
@@ -840,7 +840,7 @@ void TriggerWaveform::initializeTriggerWaveform(operation_mode_e triggerOperatio
 		break;
 
 	case trigger_type_e::TT_4_PLUS_1:
-		initialize4Plus1(this);
+		initialize4Plus1Generalized(this, 5);
 		break;
 
 	default:
