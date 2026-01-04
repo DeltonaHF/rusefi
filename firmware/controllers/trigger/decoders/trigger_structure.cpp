@@ -836,8 +836,12 @@ void TriggerWaveform::initializeTriggerWaveform(operation_mode_e triggerOperatio
 		break;
 
 	case trigger_type_e::TT_4_PLUS_2:
-		initialize4Plus2(this);
+		initialize4Plus2(this, false);
 		break;
+
+	case trigger_type_e::TT_4_MINUS_2_VVT:
+		initialize4Plus2(this, true);
+	break;
 
 	case trigger_type_e::TT_4_PLUS_1:
 		initialize4Plus1Generalized(this, 5);
