@@ -74,6 +74,8 @@ public class TriggerWheelInfo {
                 throw new IllegalStateException("Key/value lines expected: [" + line + "]");
             String key = keyValue[0];
             String value = keyValue[1];
+            if (value.equals("nan"))
+                value = "-100000"; // workaround nan values in trigger gaps
             if (key.startsWith(TRIGGER_GAP_FROM)) {
                 int index = getIndex(key);
                 gaps.gapFrom[index] = Double.parseDouble(value);
