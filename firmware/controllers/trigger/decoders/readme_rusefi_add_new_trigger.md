@@ -15,9 +15,8 @@ Adding an entirely new trigger:
 5. Update "integration/rusefi_config.txt" --> "4+2" (edit "#define trigger_type_e_enum" line to propogate new value to rusefi.ini TS project)
  
 6. if it is an entirely new trigger, which needs a new enum:
-	a. 
-	b. invoke "bash gen_config.sh" once you make changes to integration/rusefi_config.txt
-	c. invoke "bash gen_enum_to_string.sh" to populate auto_generated_enginetypes.cpp
+	a. invoke "bash ./gen_config.sh" once you make changes to integration/rusefi_config.txt - this populates .ini files for TunerStudio
+	b. invoke "bash ./gen_enum_to_string.sh" to populate auto_generated_enginetypes.cpp
 
 7. rusefi/unit_tests$ make -j8 
 	Notes:
@@ -29,12 +28,23 @@ Adding an entirely new trigger:
 		a. "build/rusefi_test --gtest_list_tests" - to list the tests
 		b. "build/rusefi_test --gtest_filter=Triggers*" to run only Triggers test 
 
-9. I am unsure whether this is only needed if a new trigger just added, which needed a new enum, or always a change in trigger is implemented:
+9. Only needed if a new trigger just added, which needed a new enum:
 	a. rusefi/java_tools$ ./gradlew :trigger-ui:shadowJar
 
 10. rusefi/unit_tests$ "java -jar ../java_console/trigger-ui/build/libs/trigger-ui-all.jar" - generate new trigger images (located in unit_tests/triggers)
 
+-----
+VVT
+1. add as a regular decoder (for camshaft, and w/o tdc offset)
+2. add to trigger_structure switch case (unsure if this is needed, when wheel only used for VVT)
+3. controllers/algo/engine_types.h --> enum for trigger structure switch case
+4. firmware/controllers/algo/rusefi_enums.h --> append add enum for vvt
+4. firmware/controllers/algo/engine.cpp --> add mapping between vvt_mode_e and trigger_type_e in getVvtTriggerType (e.g. case VVT_4_MINUS_2: return rigger_type_e::TT_4_MINUS_2_VVT;)
+
+ 
+
 Notes:
-rusEFI always uses the trigger with more teeth for timing operations
+WRONG ASSUMPTION:
+[rusEFI always uses the trigger with more teeth for timing operations
 the other is used for sync only
-sync has to be established with the primary gear, this makes it sometimes necessary to use cam as primary
+sync has to be established with the primary gear, this makes it sometimes necessary to use cam as primary]

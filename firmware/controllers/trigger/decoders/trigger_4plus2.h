@@ -1,8 +1,8 @@
 /**
  * @file trigger_4plus2.h
  *
- * @date December 20, 2024
- * @author [Your Name]
+ * @date December 20, 2025
+ * @author Nik (Deltona HF)
  *
  * 4+2 trigger decoder
  * Crank: 4 equally spaced teeth (90 degrees apart)
@@ -14,4 +14,4 @@
 
 class TriggerWaveform;
 
-void initialize4Plus2(TriggerWaveform *s);
+void initialize4Plus2(TriggerWaveform *s, bool b_useCamOnly);

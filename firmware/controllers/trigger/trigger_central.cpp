@@ -189,7 +189,7 @@ static angle_t adjustCrankPhase(int camIndex) {
 	case VVT_FORD_ST170:
 	case VVT_BARRA_3_PLUS_1:
 	case VVT_NISSAN_MR:
-  case VVT_HR12DDR_IN:
+    case VVT_HR12DDR_IN:
 	case VVT_MAZDA_SKYACTIV:
 	case VVT_MAZDA_L:
 	case VVT_MITSUBISHI_4G69:
@@ -199,6 +199,7 @@ static angle_t adjustCrankPhase(int camIndex) {
 	case VVT_HONDA_K_EXHAUST:
 	case VVT_HONDA_CBR_600:
 	case VVT_SUBARU_7TOOTH:
+	case VVT_4_MINUS_2:
 		return tc->syncEnginePhaseAndReport(crankDivider, 0);
 	case VVT_CUSTOM_25:
 	case VVT_CUSTOM_26:
