@@ -97,6 +97,8 @@ int getCrankDivider(operation_mode_e operationMode) {
 		return SYMMETRICAL_CRANK_SENSOR_DIVIDER;
 	case FOUR_STROKE_THREE_TIMES_CRANK_SENSOR:
 		return SYMMETRICAL_THREE_TIMES_CRANK_SENSOR_DIVIDER;
+	case FOUR_STROKE_FOUR_TIMES_CRANK_SENSOR:
+		return SYMMETRICAL_FOUR_TIMES_CRANK_SENSOR_DIVIDER;
 	case FOUR_STROKE_SIX_TIMES_CRANK_SENSOR:
 		return SYMMETRICAL_SIX_TIMES_CRANK_SENSOR_DIVIDER;
 	case FOUR_STROKE_TWELVE_TIMES_CRANK_SENSOR:
@@ -126,6 +128,7 @@ PUBLIC_API_WEAK void boardTriggerCallback(efitick_t timestamp, float currentPhas
 
 static bool vvtWithRealDecoder(vvt_mode_e vvtMode) {
 	return vvtMode != VVT_INACTIVE
+			&& vvtMode != VVT_4_MINUS_2 /* IAW 4-2 cam wheel */
 			&& vvtMode != VVT_TOYOTA_3_TOOTH /* VVT_2JZ is an unusual 3/0 missed tooth symmetrical wheel */
 			&& vvtMode != VVT_HONDA_K_INTAKE
 			&& vvtMode != VVT_MAP_V_TWIN
@@ -146,10 +149,58 @@ angle_t TriggerCentral::syncEnginePhaseAndReport(int divider, int remainder) {
 }
 
 PUBLIC_API_WEAK angle_t customAdjustCustom(TriggerCentral *tc, vvt_mode_e vvtMode) {
-	UNUSED(tc);
-	UNUSED(vvtMode);
+	//	UNUSED(tc);
+	//	UNUSED(vvtMode);
 
-  return 0;
+	// Only run this logic for our specific custom mode
+	if (vvtMode == VVT_4_MINUS_2) {
+		
+		static uint32_t lastCrankCount = 0;
+		
+		// Get the total number of crank teeth seen so far (absolute counter)
+		uint32_t currentCrankCount = tc->triggerState.getSynchronizationCounter();
+		
+		// Calculate how many crank teeth passed since the last Cam event
+		uint32_t delta = currentCrankCount - lastCrankCount;
+		
+		// Save current count for next time
+		lastCrankCount = currentCrankCount;
+
+		// Safety: Ignore startup noise or first event where delta is huge
+		if (delta == 0 || delta > 20) {
+			return 0;
+		}
+
+		// We have 4 teeth per rev, so 8 teeth per 720 cycle.
+		// We instruct the ECU to resolve the cycle into 8 segments.
+		const int cycleDivider = 8;
+
+		// --- Sequence Detection Logic ---
+
+		// Case A: The "Short" Gap (User said 2 pulses)
+		// Allowing a small margin (+/- 1) for safety
+		if (delta == 2) {
+			// We just finished the gap of ~2 teeth.
+			// This means we are at Cam Event 2.
+			// Based on pattern: Cam 1 -> C1, C2 -> Cam 2.
+			// So we are currently located after Crank Tooth Index 2.
+			// (Where 0=TDC #1, 1=90deg, 2=180deg).
+			return tc->syncEnginePhaseAndReport(cycleDivider, 2);
+		}
+		
+		// Case B: The "Long" Gap (User said 5 pulses, math suggests 6)
+		// C3, C4, C5, C6, C7, C0 -> Cam 1. (6 teeth).
+		// Allowing range 5-7 covers both interpretations.
+		else if (delta >= 5) {
+			// We just finished the gap of ~6 teeth.
+			// This means we are at Cam Event 1.
+			// Based on pattern: Cam 2 -> C3..C0 -> Cam 1.
+			// We are located after Crank Tooth Index 0 (TDC).
+			return tc->syncEnginePhaseAndReport(cycleDivider, 0);
+		}
+	}
+
+	return 0;
 }
 
 static angle_t adjustCrankPhase(int camIndex) {
@@ -199,8 +250,8 @@ static angle_t adjustCrankPhase(int camIndex) {
 	case VVT_HONDA_K_EXHAUST:
 	case VVT_HONDA_CBR_600:
 	case VVT_SUBARU_7TOOTH:
-	case VVT_4_MINUS_2:
 		return tc->syncEnginePhaseAndReport(crankDivider, 0);
+	case VVT_4_MINUS_2:
 	case VVT_CUSTOM_25:
 	case VVT_CUSTOM_26:
 	  return customAdjustCustom(tc, vvtMode);

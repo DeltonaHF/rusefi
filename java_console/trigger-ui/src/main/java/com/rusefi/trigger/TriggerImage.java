@@ -152,7 +152,8 @@ public class TriggerImage {
             content.add(topPanel, BorderLayout.NORTH);
             content.add(triggerPanel, BorderLayout.CENTER);
 
-            f.showFrame(content);
+            // show content in scroll pane so wide images are viewable in-window
+            f.showFrame(new JScrollPane(content));
             if (DEBUG)
                 f.getFrame().setBackground(Color.cyan);
             f.getFrame().setSize(FRAME_WIDTH, FRAME_HEIGHT);
@@ -200,8 +201,9 @@ public class TriggerImage {
         triggerPanel.isCrankBased = triggerWheelInfo.isCrankBased();
 
         EngineReport re0 = new EngineReport(waves.get(0).list, MIN_TIME, 720 * (1 + EXTRA_COUNT));
-        System.out.println(re0);
+        System.out.println("re0: " + re0);
         EngineReport re1 = new EngineReport(waves.get(1).list, MIN_TIME, 720 * (1 + EXTRA_COUNT));
+        System.out.println("re1: " + re1);
 
         triggerPanel.removeAll();
         UpDownImage upDownImage0 = new UpDownImage(re0, "trigger");
@@ -233,9 +235,23 @@ public class TriggerImage {
 
         AutoupdateUtil.trueLayoutAndRepaint(triggerPanel);
         AutoupdateUtil.trueLayoutAndRepaint(triggerPanel);
-        content.paintImmediately(content.getVisibleRect());
+
+        // Ensure content is laid out to its preferred size so we render everything, not only the viewport
+        Dimension full = content.getPreferredSize();
+        content.setSize(full);
+        AutoupdateUtil.trueLayoutAndRepaint(content);
+
         new File(OUTPUT_FOLDER).mkdir();
-        UiUtils.saveImage(OUTPUT_FOLDER + File.separator + "trigger_" + findByOrdinal(triggerWheelInfo.getId()) + ".png", content);
+        try {
+            java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(content.getWidth(), content.getHeight(), java.awt.image.BufferedImage.TYPE_INT_ARGB);
+            Graphics2D ig = image.createGraphics();
+            ig.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            content.printAll(ig);
+            ig.dispose();
+            javax.imageio.ImageIO.write(image, "png", new File(OUTPUT_FOLDER + File.separator + "trigger_" + findByOrdinal(triggerWheelInfo.getId()) + ".png"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @NotNull

@@ -33,6 +33,9 @@ void configureKawaKX450F(TriggerWaveform *s);
 // TT_3_TOOTH_CRANK
 void configure3ToothCrank(TriggerWaveform*);
 
+// TT_4_TOOTH_CRANK
+void configure4ToothCrank(TriggerWaveform*);
+
 // TT_6_TOOTH_CRANK
 void configure6ToothCrank(TriggerWaveform*);
 

@@ -33,6 +33,7 @@ static bool noFiringUntilVvtSync() {
 	return
 		operationMode == FOUR_STROKE_SYMMETRICAL_CRANK_SENSOR ||
 		operationMode == FOUR_STROKE_THREE_TIMES_CRANK_SENSOR ||
+		operationMode == FOUR_STROKE_FOUR_TIMES_CRANK_SENSOR ||
 		operationMode == FOUR_STROKE_TWELVE_TIMES_CRANK_SENSOR;
 }
 #endif // EFI_SHAFT_POSITION_INPUT

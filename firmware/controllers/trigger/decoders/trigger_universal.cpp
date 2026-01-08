@@ -184,6 +184,21 @@ void configure3ToothCrank(TriggerWaveform* s) {
   commonSymmetrical(s, 3, 0.5, 1.4);
 }
 
+/**
+ * Configure 4 equally spaced teeth per revolution (90 degrees apart).
+ * This relies on the Cam sensor for phase synchronization.
+ */
+void configure4ToothCrank(TriggerWaveform* s) {
+    // initialize as Symmetrical Crank. 
+    // This tells rusEFI that the pattern repeats, creating 'ambiguity'.
+    // getCrankDivider() for this mode returns 4, implying 4 segments per 360 degrees.
+    s->initialize(FOUR_STROKE_FOUR_TIMES_CRANK_SENSOR, SyncEdge::RiseOnly);
+    
+    // commonSymmetrical creates a single tooth definition that is repeated 'count' times.
+    // This ensures synchronizationCounter increments on EVERY crank tooth.
+    commonSymmetrical(s, 4, 0.5f, 1.5f);
+}
+
 void configure6ToothCrank(TriggerWaveform* s) {
 	s->initialize(FOUR_STROKE_SIX_TIMES_CRANK_SENSOR, SyncEdge::RiseOnly);
   commonSymmetrical(s, 6, 0.7, 1.4);
