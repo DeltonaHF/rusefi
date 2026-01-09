@@ -245,14 +245,14 @@ enum class trigger_type_e : uint32_t {
 	// symmetrical crank
 	TT_SUBARU_7_6_CRANK = 94,
 
-	// Fiat - Lancia IAW 4 Crank + 2 Cam
-	TT_4_PLUS_2 = 95, 
+	// Crank trigger of Fiat - Lancia IAW. The full pattern consists of: 
+	//    a) CRANK: "4-tooth symmetric" wheel; 
+	//    b) CAM: "4 minus 2" wheel. Note: CAM trigger should be decoded through VVT.
+	TT_IAW_4_PLUS_2_CRANK = 95, 
 
-	// Fiat - Lancia IAW CAM Only (full pattern 4 Crank + 2 Cam)
-	TT_4_MINUS_2_VVT = 96,
-
-	// Fiat - Lancia 4+1 on crankshaft, Digiplex 2 and Digiplex 2s
-	TT_4_PLUS_1 = 97, 
+	// Crank trigger of Fiat - Lancia 4+1 Digiplex 2 and Digiplex 2s. The pattern consists of: 
+	//    a) CRANK 4 symmetric teeth 5 degrees off TDC (Tipo/Tempra: 5/95 deg ATDC; Thema 16v: 5/95 deg BTDC), and one additional tooth at #1 and #4 TDC (also used for sync)
+	TT_DIGIPLEX_4_PLUS_1_CRANK = 96, 
 
 	// do not forget to edit "#define trigger_type_e_enum" line in integration/rusefi_config.txt file to propogate new value to rusefi.ini TS project
 	// do not forget to invoke "gen_config.bat" once you make changes to integration/rusefi_config.txt
@@ -260,7 +260,7 @@ enum class trigger_type_e : uint32_t {
 	//
 	// Another point: once you add a new trigger, run get_trigger_images.bat which would run rusefi_test.exe from unit_tests
 	//
-	TT_UNUSED = 98, // this is used if we want to iterate over all trigger types
+	TT_UNUSED = 97, // this is used if we want to iterate over all trigger types
 };
 
 typedef enum {

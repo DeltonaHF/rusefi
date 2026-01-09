@@ -128,7 +128,7 @@ PUBLIC_API_WEAK void boardTriggerCallback(efitick_t timestamp, float currentPhas
 
 static bool vvtWithRealDecoder(vvt_mode_e vvtMode) {
 	return vvtMode != VVT_INACTIVE
-			&& vvtMode != VVT_4_MINUS_2 /* IAW 4-2 cam wheel */
+			&& vvtMode != VVT_IAW_4_PLUS_2_CAM /* IAW 4+2 cam wheel */
 			&& vvtMode != VVT_TOYOTA_3_TOOTH /* VVT_2JZ is an unusual 3/0 missed tooth symmetrical wheel */
 			&& vvtMode != VVT_HONDA_K_INTAKE
 			&& vvtMode != VVT_MAP_V_TWIN
@@ -153,7 +153,7 @@ PUBLIC_API_WEAK angle_t customAdjustCustom(TriggerCentral *tc, vvt_mode_e vvtMod
 	//	UNUSED(vvtMode);
 
 	// Only run this logic for our specific custom mode
-	if (vvtMode == VVT_4_MINUS_2) {
+	if (vvtMode == VVT_IAW_4_PLUS_2_CAM) {
 		
 		static uint32_t lastCrankCount = 0;
 		
@@ -251,7 +251,7 @@ static angle_t adjustCrankPhase(int camIndex) {
 	case VVT_HONDA_CBR_600:
 	case VVT_SUBARU_7TOOTH:
 		return tc->syncEnginePhaseAndReport(crankDivider, 0);
-	case VVT_4_MINUS_2:
+	case VVT_IAW_4_PLUS_2_CAM:
 	case VVT_CUSTOM_25:
 	case VVT_CUSTOM_26:
 	  return customAdjustCustom(tc, vvtMode);

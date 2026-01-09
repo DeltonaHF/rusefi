@@ -65,7 +65,8 @@
 
 #include "board_overrides.h"
 
-#define TS_DEFAULT_SPEED 38400
+//#define TS_DEFAULT_SPEED 38400
+#define TS_DEFAULT_SPEED 115200
 
 std::optional<setup_custom_board_overrides_type> custom_board_DefaultConfiguration;
 std::optional<setup_custom_board_overrides_type> custom_board_ConfigOverrides;

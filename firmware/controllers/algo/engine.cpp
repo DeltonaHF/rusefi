@@ -87,6 +87,7 @@ trigger_type_e getVvtTriggerType(vvt_mode_e vvtMode) {
 	case VVT_HONDA_K_INTAKE:
 	case VVT_SINGLE_TOOTH:
 	case VVT_MAP_V_TWIN:
+	case VVT_IAW_4_PLUS_2_CAM:
 		return trigger_type_e::TT_HALF_MOON;
 	case VVT_FORD_ST170:
 		return trigger_type_e::TT_FORD_ST170;
@@ -125,8 +126,6 @@ trigger_type_e getVvtTriggerType(vvt_mode_e vvtMode) {
 	    return trigger_type_e::TT_NISSAN_HR_CAM_IN;
 	case VVT_SUBARU_7TOOTH:
 			return trigger_type_e::TT_VVT_SUBARU_7_WITHOUT_6;
-	case VVT_4_MINUS_2:
-		return trigger_type_e::TT_4_MINUS_2_VVT;
 	default:
 	  return getCustomVvtTriggerType(vvtMode);
 	}

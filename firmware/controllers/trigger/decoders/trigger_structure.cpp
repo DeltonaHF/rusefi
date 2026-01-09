@@ -38,7 +38,6 @@
 #include "trigger_vw.h"
 #include "trigger_universal.h"
 #include "trigger_mercedes.h"
-#include "trigger_4plus2.h"
 #include "trigger_generalized.h"
 #include "engine_state.h"
 
@@ -838,16 +837,11 @@ void TriggerWaveform::initializeTriggerWaveform(operation_mode_e triggerOperatio
 		initializeSubaru7_6_crankOnly(this);
 		break;
 
-	case trigger_type_e::TT_4_PLUS_2:
+	case trigger_type_e::TT_IAW_4_PLUS_2_CRANK:
 		configure4ToothCrank(this);
 		break;
-//		initialize4Plus2(this, false);
 
-	case trigger_type_e::TT_4_MINUS_2_VVT:
-		initialize4Plus2(this, true);
-	break;
-
-	case trigger_type_e::TT_4_PLUS_1:
+	case trigger_type_e::TT_DIGIPLEX_4_PLUS_1_CRANK:
 		initialize4Plus1Generalized(this, 5);
 		break;
 
