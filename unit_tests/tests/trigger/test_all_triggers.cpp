@@ -84,11 +84,14 @@ TEST_P(AllTriggersFixture, TestTrigger) {
 
 	fprintf(fp, "%s=%s\n", TRIGGER_KNOWN_OPERATION_MODE, shape->knownOperationMode ? "true" : "false");
 	operation_mode_e mode = shape->getWheelOperationMode();
-	bool isOneOfCrankShapes = mode == FOUR_STROKE_CRANK_SENSOR ||
+	bool isOneOfCrankShapes = 
+      mode == FOUR_STROKE_CRANK_SENSOR ||
+			mode == FOUR_STROKE_SYMMETRICAL_CRANK_SENSOR ||
 			mode == FOUR_STROKE_THREE_TIMES_CRANK_SENSOR ||
 			mode == FOUR_STROKE_FOUR_TIMES_CRANK_SENSOR ||
-			mode == FOUR_STROKE_SYMMETRICAL_CRANK_SENSOR ||
-			mode == FOUR_STROKE_TWELVE_TIMES_CRANK_SENSOR;
+      mode == FOUR_STROKE_SIX_TIMES_CRANK_SENSOR ||
+			mode == FOUR_STROKE_TWELVE_TIMES_CRANK_SENSOR ||
+      mode == FOUR_STROKE_43_TIMES_CRANK_SENSOR;
 	fprintf(fp, "%s=%s\n", TRIGGER_IS_CRANK_KEY, isOneOfCrankShapes ? "true" : "false");
 
 	fprintf(fp, "%s=%s\n", TRIGGER_HAS_SECOND_CHANNEL, shape->needSecondTriggerInput ? "true" : "false");
