@@ -103,6 +103,8 @@ int getCrankDivider(operation_mode_e operationMode) {
 		return SYMMETRICAL_SIX_TIMES_CRANK_SENSOR_DIVIDER;
 	case FOUR_STROKE_TWELVE_TIMES_CRANK_SENSOR:
 		return SYMMETRICAL_TWELVE_TIMES_CRANK_SENSOR_DIVIDER;
+	case FOUR_STROKE_43_TIMES_CRANK_SENSOR:
+		return SYMMETRICAL_43_TIMES_CRANK_SENSOR_DIVIDER;
 	case OM_NONE:
 	case FOUR_STROKE_CAM_SENSOR:
 	case TWO_STROKE:
@@ -144,6 +146,11 @@ angle_t TriggerCentral::syncEnginePhaseAndReport(int divider, int remainder) {
 		// Reset instant RPM, since the engine phase has now changed, invalidating the tooth history buffer
 		// maybe TODO: could/should we rotate the buffer around to re-align it instead? Is that worth it?
 		instantRpm.resetInstantRpm();
+
+//DEBUG ("SyncEnginePhase: divider=%d remainder=%d totalShift=%f", divider, remainder, totalShift);
+    efiPrintf("trigger_central.cpp: SyncEnginePhase: divider=%d remainder=%d totalShift=%f\r\n", divider, remainder, totalShift);
+
+
 	}
 	return totalShift;
 }
@@ -562,7 +569,112 @@ void handleShaftSignal(int signalIndex, bool isRising, efitick_t timestamp) {
 		return;
 	}
 
+
+// [BEGIN: TT_129DIV3PLUS1_CRANK] Decimation & Sync logic for 129/3 plus 1 crank trigger
+  if (engineConfiguration->trigger.type == trigger_type_e::TT_129DIV3PLUS1_CRANK) {
+    static int decimationCounter = 0;
+
+#if 0
+    // TEMPORARY DEBUG
+    if (signal == SHAFT_SECONDARY_RISING || signal == SHAFT_SECONDARY_FALLING) {
+      efiPrintf("Secondary signal: %s at signalIndex=%d",
+        getTrigger_event_e(signal), signalIndex);
+    }
+    else
+      if (signal == SHAFT_PRIMARY_RISING || signal == SHAFT_PRIMARY_FALLING) {
+        efiPrintf("Primary signal: %s at signalIndex=%d, decimationCounter=%d",
+          getTrigger_event_e(signal), signalIndex, decimationCounter);
+      }
+    // END TEMPORARY DEBUG
+#endif
+
+
+    // Handle BOTH secondary edges for logging/counting purposes
+    if (signal == SHAFT_SECONDARY_RISING  || signal == SHAFT_SECONDARY_FALLING) {
+      // --- SECONDARY TRIGGER (Sync Tooth) ---
+    	TriggerCentral *tc = getTriggerCentral();
+
+      // Count this event
+      tc->hwEventCounters[(int)signal]++;
+
 #if EFI_TOOTH_LOGGER
+      LogTriggerTooth(signal, timestamp);
+#endif
+
+#if EFI_ENGINE_SNIFFER
+      addEngineSnifferCrankEvent(
+         1, // wheelIndex for secondary
+         0, // tooth index
+         signal == SHAFT_SECONDARY_RISING ? FrontDirection::UP : FrontDirection::DOWN);
+#endif
+
+      // Only do sync logic on RISING edge
+      if (signal == SHAFT_SECONDARY_RISING) {
+#if EFI_ENGINE_SNIFFER
+        addEngineSnifferCrankEvent(
+           1, // wheelIndex for secondary
+           0, // tooth index
+           FrontDirection::DOWN);
+#endif
+
+
+
+        // efiPrintf("Sync tooth detected, decimationCounter=%d\r\n", decimationCounter);
+
+        // Indicate that a resync is needed
+        if(decimationCounter != 128) {
+          efiPrintf("Sync tooth arrived at decimationCounter=%d!; Resync needed.\r\n", decimationCounter);
+          tc->triggerState.resetHasFullSync();
+          tc->triggerState.setShaftSynchronized(false);
+        }
+
+        if(!tc->triggerState.hasSynchronizedPhase()) {
+          efiPrintf("Resyncing at primary rising, decimationCounter=%d\r\n", decimationCounter);
+          // Either not synced yet or an error in sync, resync needed
+
+          // Reset the decoder's position
+          tc->triggerState.currentCycle.current_index = 0;
+    
+          // Mark as synchronized (but don't call the full sync logic)
+          tc->triggerState.setShaftSynchronized(true);
+
+          // Get the crank divider for the 43-tooth pattern
+          int crankDivider = getCrankDivider(getEngineRotationState()->getOperationMode());
+    
+          // Tell the decoder we're at position 0 of the 43-tooth cycle
+          // remainder = 0 means "we are at the first position"
+          tc->syncEnginePhaseAndReport(crankDivider, 0);
+        }
+
+        // Reset decimation counter
+        decimationCounter = -1; // Will be incremented to 0 on next primary rising edge
+
+      }
+
+      // Swallow BOTH edges - don't pass to decoder
+      return;
+    }
+
+    if (signal == SHAFT_PRIMARY_RISING) {
+      
+      // --- PRIMARY TRIGGER (129 tooth ring) ---
+      decimationCounter++;
+
+    //  decimationCounter %= 2 * 129;
+    }
+
+    if (signal == SHAFT_PRIMARY_RISING || signal == SHAFT_PRIMARY_FALLING) {
+      // For primary edges, we only want to pass every 3rd tooth + 1
+    // Pass only every 3rd tooth (Indices 1, 4, 7...)
+      if ((decimationCounter % 3) != 1) {
+        return;
+      }
+      // Fall through to normal decoder for this tooth edge
+    }
+  }
+  // [END: TT_129DIV3PLUS1_CRANK]
+
+  #if EFI_TOOTH_LOGGER
 	// Log to the Tunerstudio tooth logger
 	// We want to do this before anything else as we
 	// actually want to capture any noise/jitter that may be occurring

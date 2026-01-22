@@ -15,7 +15,8 @@ Adding an entirely new trigger:
 5. Update "integration/rusefi_config.txt" --> "4+2" (edit "#define trigger_type_e_enum" line to propogate new value to rusefi.ini TS project)
  
 6. if it is an entirely new trigger, which needs a new enum:
-	a. invoke "bash ./gen_config.sh" once you make changes to integration/rusefi_config.txt - this populates .ini files for TunerStudio
+	a.1) invoke "bash ./gen_config.sh" once you make changes to integration/rusefi_config.txt - this populates .ini files for TunerStudio
+	a.2) alternative to a.1) to just produce a single ini (useful after small changes): ./gen_config_board.sh config/boards/f407-discovery f407-discovery	
 	b. invoke "bash ./gen_enum_to_string.sh" to populate auto_generated_enginetypes.cpp
 
 7. rusefi/unit_tests$ make -j8 

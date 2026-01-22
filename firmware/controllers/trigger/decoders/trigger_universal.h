@@ -41,3 +41,12 @@ void configure6ToothCrank(TriggerWaveform*);
 
 // TT_12_TOOTH_CRANK
 void configure12ToothCrank(TriggerWaveform*);
+
+// TT_43_TOOTH_CRANK
+void configure43ToothCrank(TriggerWaveform*);
+
+// TT_43_TOOTH_CRANK
+void configure43ToothCrank(TriggerWaveform*);
+
+// TT_129DIV3PLUS1_CRANK
+void configure129DIV3Plus1ToothCrank(TriggerWaveform*);

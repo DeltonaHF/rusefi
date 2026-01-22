@@ -203,3 +203,52 @@ void configure6ToothCrank(TriggerWaveform* s) {
 	s->initialize(FOUR_STROKE_SIX_TIMES_CRANK_SENSOR, SyncEdge::RiseOnly);
   commonSymmetrical(s, 6, 0.7, 1.4);
 }
+
+/**
+ * Configure 43 equally spaced teeth per revolution (8.3721 degrees apart).
+ * This relies on the Cam sensor for phase synchronization.
+ */
+void configure43ToothCrank(TriggerWaveform* s) {
+    // initialize as Symmetrical Crank. 
+    // This tells rusEFI that the pattern repeats, creating 'ambiguity'.
+    // getCrankDivider() for this mode returns 43, implying 43 segments per 360 degrees.
+    s->initialize(FOUR_STROKE_43_TIMES_CRANK_SENSOR, SyncEdge::RiseOnly);
+    
+    // commonSymmetrical creates a single tooth definition that is repeated 'count' times.
+    // This ensures synchronizationCounter increments on EVERY crank tooth.
+    commonSymmetrical(s, 43, 0.25f, 4.f);
+    
+}
+
+/**
+ * Configure 129/3+1 pattern - 43 equally spaced teeth per revolution (8.3721 degrees apart).
+ * This relies on the Cam sensor for phase synchronization.
+ */
+void configure129DIV3Plus1ToothCrank(TriggerWaveform* s) {
+    // initialize as Symmetrical Crank. 
+    // This tells rusEFI that the pattern repeats, creating 'ambiguity'.
+    // getCrankDivider() for this mode returns 43, implying 43 segments per 360 degrees.
+    s->initialize(FOUR_STROKE_CRANK_SENSOR, SyncEdge::RiseOnly);
+    
+//    s->addEvent(1./360, TriggerValue::RISE, TriggerWheel::T_SECONDARY);
+//    s->addEvent(2./360, TriggerValue::FALL, TriggerWheel::T_SECONDARY);
+
+    // commonSymmetrical creates a single tooth definition that is repeated 'count' times.
+    // This ensures synchronizationCounter increments on EVERY crank tooth.
+//    commonSymmetrical(s, 43, 0.25f, 4.f);
+    for(unsigned i = 1; i <= 43; i++) {
+        float relTurnUp = ((i-0.5f) / 43.0f);
+        float relTurnDown = (i / 43.0f);
+        s->addEvent(relTurnUp, TriggerValue::RISE, TriggerWheel::T_PRIMARY);
+        s->addEvent(relTurnDown, TriggerValue::FALL, TriggerWheel::T_PRIMARY);
+    }
+//    s->setTriggerSynchronizationGap(1.0f); 
+    s->shapeWithoutTdc = true; 
+
+		// Force enablement of the second hardware input so we can receive the sync tooth
+		// even though the standard 43-tooth shape definition doesn't use it.
+    s->needSecondTriggerInput = true;  // Force it true for pin config
+    s->isSynchronizationNeeded = false; // We handle synchronization manually in the code
+    s->tdcPosition = 0 * (360-62);                // sync teeth is 62° BTDC cylinder #1
+	  
+}

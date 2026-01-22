@@ -304,6 +304,8 @@ typedef enum {
 
 	FOUR_STROKE_FOUR_TIMES_CRANK_SENSOR = 8,
 
+	FOUR_STROKE_43_TIMES_CRANK_SENSOR = 9,
+
 } operation_mode_e;
 
 /**
