@@ -35,3 +35,7 @@ gradlew text eol=lf
 *.png binary
 *.jpg binary
 
+# resolve conflicts for auto-generated *.h and *.ini
+# In .gitattributes (at repo root)
+firmware/controllers/generated/*.h merge=ours
+firmware/tunerstudio/generated/*.ini merge=ours
