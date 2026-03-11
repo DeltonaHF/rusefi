@@ -12,18 +12,21 @@ public class ImmutableIniFileModel implements IniFileModel {
     private final Map<String, IniField> allIniFields;
     private final Map<String, IniField> secondaryIniFields;
     private final Map<String, IniField> allOutputChannels;
+    private final Map<String, String> expressionOutputChannels;
     private final Map<String, String> protocolMeta;
     private final IniFileMetaInfo metaInfo;
     private final String iniFilePath;
     private final Map<String, String> tooltips;
     private final Map<String, DialogModel.Field> fieldsInUiOrder;
-    private final Map<String, String> xBinsByZBins;
-    private final Map<String, String> yBinsByZBins;
     private final Map<String, DialogModel> dialogs;
     private final Map<String, GaugeCategoryModel> gaugeCategories;
     private final Map<String, GaugeModel> gauges;
+    private final Map<String, TableModel> tables;
+    private final Map<String, CurveModel> curves;
     private final Map<String, String> topicHelp;
     private final Map<String, ContextHelpModel> contextHelp;
+    private final List<MenuModel> menus;
+    private final FrontPageModel frontPage;
 
     private static <V> Map<String, V> copyWithCaseInsensitiveKeys(Map<String, V> source) {
         TreeMap<String, V> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -37,36 +40,43 @@ public class ImmutableIniFileModel implements IniFileModel {
                                  Map<String, IniField> allIniFields,
                                  Map<String, IniField> secondaryIniFields,
                                  Map<String, IniField> allOutputChannels,
+                                 Map<String, String> expressionOutputChannels,
                                  Map<String, String> protocolMeta,
                                  IniFileMetaInfo metaInfo,
                                  String iniFilePath,
                                  Map<String, String> tooltips,
                                  Map<String, DialogModel.Field> fieldsInUiOrder,
-                                 Map<String, String> xBinsByZBins,
-                                 Map<String, String> yBinsByZBins,
                                  Map<String, DialogModel> dialogs,
                                  Map<String, GaugeCategoryModel> gaugeCategories,
                                  Map<String, GaugeModel> gauges,
                                  Map<String, String> topicHelp,
-                                 Map<String, ContextHelpModel> contextHelp) {
+                                 Map<String, ContextHelpModel> contextHelp,
+                                 Map<String, TableModel> tables,
+                                 Map<String, CurveModel> curves,
+                                 String menuDialog,
+                                 List<MenuModel> menus,
+                                 FrontPageModel frontPage) {
         this.signature = signature;
         this.blockingFactor = blockingFactor;
         this.defines = Collections.unmodifiableMap(new TreeMap<>(defines));
         this.allIniFields = copyWithCaseInsensitiveKeys(allIniFields);
         this.secondaryIniFields = copyWithCaseInsensitiveKeys(secondaryIniFields);
         this.allOutputChannels = copyWithCaseInsensitiveKeys(allOutputChannels);
+        this.expressionOutputChannels = copyWithCaseInsensitiveKeys(expressionOutputChannels);
         this.protocolMeta = Collections.unmodifiableMap(new TreeMap<>(protocolMeta));
         this.metaInfo = metaInfo;
         this.iniFilePath = iniFilePath;
         this.tooltips = Collections.unmodifiableMap(new TreeMap<>(tooltips));
         this.fieldsInUiOrder = Collections.unmodifiableMap(new LinkedHashMap<>(fieldsInUiOrder));
-        this.xBinsByZBins = copyWithCaseInsensitiveKeys(xBinsByZBins);
-        this.yBinsByZBins = copyWithCaseInsensitiveKeys(yBinsByZBins);
         this.dialogs = Collections.unmodifiableMap(new TreeMap<>(dialogs));
         this.gaugeCategories = Collections.unmodifiableMap(new LinkedHashMap<>(gaugeCategories));
         this.gauges = copyWithCaseInsensitiveKeys(gauges);
         this.topicHelp = Collections.unmodifiableMap(new TreeMap<>(topicHelp));
         this.contextHelp = Collections.unmodifiableMap(new LinkedHashMap<>(contextHelp));
+        this.tables = copyWithCaseInsensitiveKeys(tables);
+        this.curves = copyWithCaseInsensitiveKeys(curves);
+        this.menus = Collections.unmodifiableList(new ArrayList<>(menus));
+        this.frontPage = frontPage;
     }
 
     @Override
@@ -98,7 +108,11 @@ public class ImmutableIniFileModel implements IniFileModel {
 
     @Override
     public Optional<IniField> findIniField(String key) {
-        return Optional.ofNullable(allIniFields.get(key));
+        IniField field = allIniFields.get(key);
+        if (field == null) {
+            field = secondaryIniFields.get(key);
+        }
+        return Optional.ofNullable(field);
     }
 
     @Override
@@ -118,6 +132,16 @@ public class ImmutableIniFileModel implements IniFileModel {
         if (result == null)
             throw new IniMemberNotFound(key + " field not found");
         return result;
+    }
+
+    @Override
+    public String getExpressionOutputChannel(String key) {
+        return expressionOutputChannels.get(key);
+    }
+
+    @Override
+    public Map<String, String> getExpressionOutputChannels() {
+        return expressionOutputChannels;
     }
 
     @Override
@@ -146,23 +170,20 @@ public class ImmutableIniFileModel implements IniFileModel {
     }
 
     @Override
-    public String getXBin(String tableName) {
-        return xBinsByZBins.get(tableName);
-    }
-
-    @Override
-    public Set<String> getTables() {
-        return xBinsByZBins.keySet();
-    }
-
-    @Override
-    public String getYBin(String tableName) {
-        return yBinsByZBins.get(tableName);
-    }
-
-    @Override
     public Map<String, DialogModel> getDialogs() {
         return dialogs;
+    }
+
+    @Override
+    public String getDialogKeyByTitle(String dialogTitle) {
+        // TODO, if this is used heavily, we maybe need to implement a multiple-key map for the dialogs,
+        //  since some ops use the key and the screen generator uses the title
+        for (DialogModel dialog : dialogs.values()) {
+            if (dialogTitle.equals(dialog.getUiName())) {
+                return dialog.getKey();
+            }
+        }
+        return null;
     }
 
     @Override
@@ -190,6 +211,19 @@ public class ImmutableIniFileModel implements IniFileModel {
     }
 
     @Override
+    public GaugeModel findGaugeByChannel(String channelName) {
+        if (channelName == null) {
+            return null;
+        }
+        for (GaugeModel gauge : gauges.values()) {
+            if (channelName.equalsIgnoreCase(gauge.getChannel())) {
+                return gauge;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public Map<String, String> getTopicHelp() {
         return topicHelp;
     }
@@ -202,5 +236,30 @@ public class ImmutableIniFileModel implements IniFileModel {
     @Override
     public ContextHelpModel getContextHelp(String referenceName) {
         return contextHelp.get(referenceName);
+    }
+
+    @Override
+    public Map<String, TableModel> getTables() {
+        return tables;
+    }
+
+    @Override
+    public Map<String, CurveModel> getCurves() {
+        return curves;
+    }
+
+    @Override
+    public TableModel getTable(String name) {
+        return tables.get(name);
+    }
+
+    @Override
+    public FrontPageModel getFrontPage() {
+        return frontPage;
+    }
+
+    @Override
+    public List<MenuModel> getMenus() {
+        return menus;
     }
 }

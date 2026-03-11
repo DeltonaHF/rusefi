@@ -253,11 +253,12 @@ public class VariableRegistryValues {
 	public static final int CLT_CURVE_SIZE = 16;
 	public static final int CLT_FUEL_CURVE_SIZE = 16;
 	public static final int CLT_IDLE_TABLE_CLT_SIZE = 8;
-	public static final int CLT_IDLE_TABLE_RPM_SIZE = 2;
+	public static final int CLT_IDLE_TABLE_RPM_SIZE = 6;
 	public static final int CLT_LIMITER_CURVE_SIZE = 4;
 	public static final int CLT_TIMING_LOAD_AXIS_SIZE = 5;
 	public static final int CLT_TIMING_TEMP_AXIS_SIZE = 5;
 	public static final int CLT_UPPER_LIMIT = 250;
+	public static final int CLT_UPPER_VALIDATION_LIMIT = 250;
 	public static final String CMD_AC_RELAY_BENCH = "acrelaybench";
 	public static final String CMD_ALTERNATOR_PIN = "set_alternator_pin";
 	public static final String CMD_BOOST_PIN = "set_boost_pin";
@@ -434,7 +435,7 @@ public class VariableRegistryValues {
 	public static final int ego_sensor_e_ES_PLX = 4;
 	public static final String egoSettings_NAME = "CAN O2 sensors";
 	public static final int EGT_CHANNEL_COUNT = 8;
-	public static final int engine_configuration_s_size = 4004;
+	public static final int engine_configuration_s_size = 4028;
 	public static final int engine_load_mode_e_LM_ALPHA_N = 2;
 	public static final int engine_load_mode_e_LM_LUA = 3;
 	public static final int engine_load_mode_e_LM_REAL_MAF = 1;
@@ -566,7 +567,7 @@ public class VariableRegistryValues {
 	public static final int ETB_BIAS_CURVE_LENGTH = 8;
 	public static final int ETB_COUNT = 2;
 	public static final int ETB_HW_MAX_FREQUENCY = 3000;
-	public static final int FLASH_DATA_VERSION = 260119;
+	public static final int FLASH_DATA_VERSION = 260215;
 	public static final int FLOW_LINEARIZATION_MASS_SIZE = 2;
 	public static final int FLOW_LINEARIZATION_PRESSURE_SIZE = 2;
 	public static final String FRONTEND_TITLE_BAR_NAME = "rusEFI";
@@ -774,6 +775,9 @@ public class VariableRegistryValues {
 	public static final String GAUGE_NAME_WARNING_COUNTER = "Warning: counter";
 	public static final String GAUGE_NAME_WARNING_LAST = "Warning: last";
 	public static final String GAUGE_NAME_WG_POSITION = "Wastegate position sensor";
+	public static final int GAUGE_PRECISION_TEMPERATURE_C = 1;
+	public static final int GAUGE_PRECISION_TEMPERATURE_F = 2;
+	public static final String GAUGES_DECLARATIONS_FILE = "tunerstudio/gauge_declarations.ini";
 	public static final String GEAR_DETECTION_DIALOG_NAME = "Gear Detection";
 	public static final int gear_e_GEAR_1 = 1;
 	public static final int gear_e_GEAR_2 = 2;
@@ -1306,7 +1310,7 @@ public class VariableRegistryValues {
 	public static final int LUA_PWM_COUNT = 8;
 	public static final int LUA_SCRIPT_SIZE = 8000;
 	public static final int MAF_DECODING_COUNT = 32;
-	public static final String MAIN_HELP_URL = "http://www.rusefi.com/";
+	public static final String MAIN_HELP_URL = "https://rusefi.com/s/super-uaefi";
 	public static final String MAIN_PAGE_GAUGES_FILE = "tunerstudio/main_page_gauges.ini";
 	public static final int MAP_ANGLE_SIZE = 8;
 	public static final int MAP_EST_LOAD_COUNT = 16;
@@ -1369,7 +1373,7 @@ public class VariableRegistryValues {
 	public static final int PEDAL_TO_TPS_SIZE = 8;
 	public static final String pedalSensor_NAME = "Accelerator pedal";
 	public static final String pedalToTpsTbl_NAME = "ETB pedal target";
-	public static final int persistent_config_s_size = 23848;
+	public static final int persistent_config_s_size = 24016;
 	public static final int pid_s_size = 20;
 	public static final int pin_input_mode_e_PI_DEFAULT = 0;
 	public static final int pin_input_mode_e_PI_INVERTED_DEFAULT = 4;
@@ -1402,7 +1406,10 @@ public class VariableRegistryValues {
 	public static final String RE_obfuscated = "false";
 	public static final int REBOOT_COMMAND = 0xbb;
 	public static final int rotational_idle_accumulator_s_size = 4;
-	public static final int rotational_idle_s_size = 28;
+	public static final int rotational_idle_s_size = 36;
+	public static final int RotationalCutMode_Both = 2;
+	public static final int RotationalCutMode_Fuel = 1;
+	public static final int RotationalCutMode_Spark = 0;
 	public static final int RPM_AS_BYTE_LIMIT = 25000;
 	public static final int RPM_AS_BYTE_SCALE = 100;
 	public static final int SCRIPT_CURVE_16 = 16;
@@ -1412,6 +1419,7 @@ public class VariableRegistryValues {
 	public static final int SCRIPT_TABLE_8 = 8;
 	public static final int SCRIPT_TABLE_COUNT = 4;
 	public static final String SD_CARD_LABEL = "rusEFI logs";
+	public static final String SECONDARY_PANELS_FILE = "tunerstudio/secondary_panels.ini";
 	public static final int SelectedGear_Drive = 6;
 	public static final int SelectedGear_Invalid = 0;
 	public static final int SelectedGear_Low = 11;
@@ -1439,7 +1447,6 @@ public class VariableRegistryValues {
 	public static final int SentInput_INPUT6 = 6;
 	public static final int SentInput_INPUT7 = 7;
 	public static final int SentInput_NONE = 0;
-	public static final int SIGNATURE_HASH = 555873232;
 	public static final String SIMULATOR_TUNE_BIN_FILE_NAME = "generated/simulator_tune_image.bin";
 	public static final String SIMULATOR_TUNE_BIN_FILE_NAME_PREFIX = "generated/simulator_tune_image";
 	public static final String SIMULATOR_TUNE_BIN_FILE_NAME_SUFFIX = ".bin";
@@ -1508,7 +1515,7 @@ public class VariableRegistryValues {
 	public static final int torqueReductionActivationMode_e_TORQUE_REDUCTION_BUTTON = 0;
 	public static final int torqueReductionActivationMode_e_TORQUE_REDUCTION_CLUTCH_DOWN_SWITCH = 2;
 	public static final int torqueReductionActivationMode_e_TORQUE_REDUCTION_CLUTCH_UP_SWITCH = 3;
-	public static final int TOTAL_CONFIG_SIZE = 23848;
+	public static final int TOTAL_CONFIG_SIZE = 24016;
 	public static final int TPS_2_BYTE_PACKING_MULT = 100;
 	public static final int TPS_PPS_TOO_HIGH_THRESHOLD = 110;
 	public static final int TPS_PPS_TOO_LOW_THRESHOLD = -10;
@@ -1590,6 +1597,7 @@ public class VariableRegistryValues {
 	public static final int trigger_type_e_TT_NARROW_SINGLE_TOOTH = 11;
 	public static final int trigger_type_e_TT_NISSAN_HR = 84;
 	public static final int trigger_type_e_TT_NISSAN_HR_CAM_IN = 86;
+	public static final int trigger_type_e_TT_NISSAN_K11 = 29;
 	public static final int trigger_type_e_TT_NISSAN_MR18_CAM_VVT = 52;
 	public static final int trigger_type_e_TT_NISSAN_MR18_CRANK = 68;
 	public static final int trigger_type_e_TT_NISSAN_QR25 = 61;
@@ -1616,8 +1624,9 @@ public class VariableRegistryValues {
 	public static final int trigger_type_e_TT_TOOTHED_WHEEL_60_2 = 8;
 	public static final int trigger_type_e_TT_TOYOTA_3_TOOTH_UZ = 91;
 	public static final int trigger_type_e_TT_TRI_TACH = 53;
-	public static final int trigger_type_e_TT_UNUSED = 95;
-	public static final int trigger_type_e_TT_UNUSED29 = 29;
+	public static final int trigger_type_e_TT_UNUSED = 97;
+	public static final int trigger_type_e_TT_UNUSED_95 = 95;
+	public static final int trigger_type_e_TT_UNUSED_96 = 96;
 	public static final int trigger_type_e_TT_VVT_BARRA_3_PLUS_1 = 56;
 	public static final int trigger_type_e_TT_VVT_BOSCH_QUICK_START = 47;
 	public static final int trigger_type_e_TT_VVT_FORD_COYOTE = 4;
@@ -1640,10 +1649,13 @@ public class VariableRegistryValues {
 	public static final int ts_14_command_COMMAND_X14_UNUSED_1 = 0x01;
 	public static final int ts_14_command_COMMAND_X14_UNUSED_15 = 0x15;
 	public static final int ts_14_command_COMMAND_X14_UNUSED_2 = 0x02;
+	public static final int ts_14_command_TS_ESTIMATE_TORQUE_TABLE = 0x23;
 	public static final int ts_14_command_TS_ETB_AUTOCAL_0 = 0x0E;
 	public static final int ts_14_command_TS_ETB_AUTOCAL_0_FAST = 0x1C;
 	public static final int ts_14_command_TS_ETB_AUTOCAL_1 = 0x11;
 	public static final int ts_14_command_TS_ETB_AUTOCAL_1_FAST = 0x1D;
+	public static final int ts_14_command_TS_ETB_BENCH_TEST_0 = 0x24;
+	public static final int ts_14_command_TS_ETB_BENCH_TEST_1 = 0x25;
 	public static final int ts_14_command_TS_ETB_DISABLE_JAM_DETECT = 0x14;
 	public static final int ts_14_command_TS_ETB_RESET = 0x0B;
 	public static final int ts_14_command_TS_ETB_START_AUTOTUNE = 0x0C;
@@ -1710,6 +1722,7 @@ public class VariableRegistryValues {
 	public static final int ts_command_e_TS_WIDEBAND_FLASH_BY_ID = 35;
 	public static final int ts_command_e_TS_WIDEBAND_FLASH_BY_ID_FILE = 38;
 	public static final int ts_command_e_TS_WIDEBAND_PING_BY_ID = 34;
+	public static final int ts_command_e_TS_WIDEBAND_RESTART = 39;
 	public static final int ts_command_e_TS_WIDEBAND_SET_IDX_BY_ID = 33;
 	public static final int ts_command_e_TS_WIDEBAND_SET_SENS_BY_ID = 37;
 	public static final int ts_command_e_TS_X14 = 20;
@@ -1749,10 +1762,10 @@ public class VariableRegistryValues {
 	public static final int TS_RESPONSE_UNRECOGNIZED_COMMAND = 0x83;
 	public static final int TS_SCATTER_OFFSETS_COUNT = 128;
 	public static final char TS_SET_LOGGER_SWITCH = 'l';
-	public static final String TS_SIGNATURE = "rusEFI master.2026.01.22.stm32h743_nucleo.555873232";
+	public static final String TS_SIGNATURE = "rusEFI master.2026.02.26.f407-discovery.3105081426";
 	public static final char TS_SIMULATE_CAN = '>';
 	public static final char TS_TEST_COMMAND = 't';
-	public static final int TS_TOTAL_OUTPUT_SIZE = 2080;
+	public static final int TS_TOTAL_OUTPUT_SIZE = 2084;
 	public static final String TS_TRIGGER_SCOPE_CHANNEL_1_NAME = "Channel 1";
 	public static final String TS_TRIGGER_SCOPE_CHANNEL_2_NAME = "Channel 2";
 	public static final int TS_TRIGGER_SCOPE_DISABLE = 5;

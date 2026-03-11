@@ -142,6 +142,16 @@ void defaultsOrFixOnBurn() {
 	  engineConfiguration->afrExpAverageAlpha = 1;
 	}
 
+	if (engineConfiguration->referenceTorqueForGenerator == 0) {
+  	engineConfiguration->referenceTorqueForGenerator = 250;
+	}
+	if (engineConfiguration->referenceMapForGenerator == 0) {
+  	engineConfiguration->referenceMapForGenerator = 100;
+	}
+	if (engineConfiguration->referenceVeForGenerator == 0) {
+  	engineConfiguration->referenceVeForGenerator = 75;
+	}
+
 	if (engineConfiguration->alternator_iTermMin == 0) {
   	engineConfiguration->alternator_iTermMin = -1000;
 	}
@@ -228,6 +238,7 @@ void setDefaultBaseEngine() {
 	mc33810defaults();
 
  	setRpmTableBin(config->torqueRpmBins);
+ 	// here we assume load is TPS
  	setLinearCurve(config->torqueLoadBins, 0, 100, 1);
 
 	engineConfiguration->fuelAlgorithm = engine_load_mode_e::LM_SPEED_DENSITY;
@@ -426,6 +437,9 @@ void setDefaultBaseEngine() {
 	setRpmTableBin(config->maximumOilPressureBins);
 
 	engine->engineModules.apply_all([](auto & m) { m.setDefaultConfiguration(); });
+
+	engineConfiguration->useMetricOnInterface = true;
+
   // we invoke this last so that we can validate even defaults
   defaultsOrFixOnBurn();
 }

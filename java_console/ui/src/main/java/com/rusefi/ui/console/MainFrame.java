@@ -53,13 +53,12 @@ public class MainFrame {
         }
     };
 
-    public final ConnectionFailedListener listener;
+    public final ConnectionStatusLogic.Listener listener;
 
     public MainFrame(ConsoleUI consoleUI, TabbedPanel tabbedPane) {
         this.consoleUI = Objects.requireNonNull(consoleUI);
         this.tabbedPane = tabbedPane;
-        listener = (String s) -> {
-        };
+        listener = ConnectionStatusLogic.Listener.VOID;
     }
 
     private void windowOpenedHandler() {
@@ -78,7 +77,10 @@ public class MainFrame {
         }));
 
         final LinkManager linkManager = consoleUI.uiContext.getLinkManager();
-        linkManager.getConnector().connectAndReadConfiguration(new BinaryProtocol.Arguments(true), new ConnectionStateListener() {
+        linkManager.getConnector().connectAndReadConfiguration(new BinaryProtocol.Arguments(true), new ConnectionStatusLogic.Listener() {
+            @Override
+            public void onConnectionStatus(boolean isConnected) {}
+
             @Override
             public void onConnectionFailed(String errorMessage) {
                 log.error("onConnectionFailed " + errorMessage);
@@ -122,7 +124,7 @@ public class MainFrame {
         String consoleVersion = "Console " + Launcher.CONSOLE_VERSION;
         String frameTitle;
         if (ConnectionStatusLogic.INSTANCE.isConnected()) {
-            BinaryProtocol bp = consoleUI.uiContext.getLinkManager().getCurrentStreamState();
+            BinaryProtocol bp = consoleUI.uiContext.getBinaryProtocol();
             String signature = bp == null ? "not loaded" : bp.signature;
             frameTitle = consoleVersion + "; firmware=" + Launcher.firmwareVersion.get() + "@" + consoleUI.getPort() + " " + signature;
             frame.getFrame().setTitle(frameTitle);
@@ -142,7 +144,7 @@ public class MainFrame {
         root.setProperty(ConsoleUI.TAB_INDEX, tabbedPane.tabbedPane.getSelectedIndex());
         consoleUI.uiContext.DetachedRepositoryINSTANCE.saveConfig();
         getConfig().save();
-        BinaryProtocol bp = consoleUI.uiContext.getLinkManager().getCurrentStreamState();
+        BinaryProtocol bp = consoleUI.uiContext.getBinaryProtocol();
         if (bp != null && !bp.isClosed())
             bp.close(); // it could be that serial driver wants to be closed explicitly
         ExitUtil.exit("windowClosedHandler", 0);

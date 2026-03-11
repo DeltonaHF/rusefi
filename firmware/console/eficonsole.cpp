@@ -55,7 +55,7 @@ void boardSayHello() {
 }
 
 static void sayHello() {
-	efiPrintf(PROTOCOL_HELLO_PREFIX " rusEFI LLC (c) 2012-2024. All rights reserved.");
+	efiPrintf(PROTOCOL_HELLO_PREFIX " rusEFI LLC (c) 2012-2026. All rights reserved.");
 	efiPrintf(PROTOCOL_HELLO_PREFIX " rusEFI v%d@%u now=%d", getRusEfiVersion(), /*do we have a working way to print 64 bit values?!*/(int)SIGNATURE_HASH, (int)getTimeNowMs());
 	efiPrintf(PROTOCOL_HELLO_PREFIX " Chibios Kernel:       %s", CH_KERNEL_VERSION);
 	efiPrintf(PROTOCOL_HELLO_PREFIX " Compiled:     " __DATE__ " - " __TIME__ "");
@@ -72,7 +72,9 @@ static void sayHello() {
 	efiPrintf(PROTOCOL_HELLO_PREFIX " detected HSE clock %.2f MHz PLLM = %d", hseFrequencyMhz, autoDetectedRoundedMhz);
 #endif /* ENABLE_AUTO_DETECT_HSE */
 
+#if !defined(HW_HELLEN_SKIP_BOARD_TYPE)
 	efiPrintf("hellenBoardId=%d", engine->engineState.hellenBoardId);
+#endif
 
 #if defined(STM32F4) || defined(STM32F7) || defined(STM32H7)
   printUid();

@@ -695,7 +695,7 @@ void configureRusefiLuaHooks(lua_State* lState) {
 
 	lua_register(lState, "readPin", lua_readpin);
 #if EFI_PROD_CODE && EFI_SHAFT_POSITION_INPUT
-	lua_register(lState, "startCrankingEngine", [](lua_State* l) {
+	lua_register(lState, "startCrankingEngine", [](lua_State*) {
 		doStartCranking();
 		return 0;
 	});
@@ -882,6 +882,11 @@ extern int luaCommandCounters[LUA_BUTTON_COUNT];
 	  }
 		return 1;
 	});
+
+	lua_register(lState, "setEngineTorque", [](lua_State* l) {
+		engine->engineState.lua.engineTorque = luaL_checknumber(l, 1);
+		return 0;
+	});
 #endif // STM32F4
 
 #if !defined(STM32F4) || defined(WITH_LUA_GET_GPPWM_STATE)
@@ -1024,6 +1029,7 @@ extern int luaCommandCounters[LUA_BUTTON_COUNT];
 		auto rpm = Sensor::getOrZero(SensorType::Rpm);
 		auto tps = Sensor::getOrZero(SensorType::Tps1);
 
+ 	  // here we assume load is TPS
 		auto result = interpolate3d(
                   		config->torqueTable,
                   		config->torqueLoadBins, tps,

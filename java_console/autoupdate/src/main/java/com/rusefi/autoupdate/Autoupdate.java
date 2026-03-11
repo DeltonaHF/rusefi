@@ -2,6 +2,7 @@ package com.rusefi.autoupdate;
 
 import com.devexperts.logging.FileLogger;
 import com.devexperts.logging.Logging;
+import com.rusefi.AutoupdateProperty;
 import com.rusefi.core.FindFileHelper;
 import com.rusefi.core.io.BundleInfo;
 import com.rusefi.core.io.BundleInfoStrategy;
@@ -14,6 +15,8 @@ import com.rusefi.core.ui.AutoupdateUtil;
 import com.rusefi.core.ui.ErrorMessageHelper;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -26,19 +29,16 @@ import static com.devexperts.logging.Logging.getLogging;
 import static com.rusefi.core.FindFileHelper.findSrecFile;
 import static com.rusefi.core.FindFileHelper.findFirmwareFile;
 
+/**
+ * entry point of rusefi_autoupdate.exe
+ *
+ * We've given up on complex classloader logic for auto-update and ended up with startConsoleAsANewProcess approach
+ * @see com.rusefi.core.ui.ProgressView
+ */
 public class Autoupdate {
     private static final Logging log = getLogging(Autoupdate.class);
-    private static final int AUTOUPDATE_VERSION = 20260101; // separate from rusEFIVersion#CONSOLE_VERSION
-    private static final String DO_NOT_UPDATE_PROPERTY_KEY = "Autoupdate.do_not_download";
-    private static final boolean doNotDownloadPropertyValue;
-    private static final String SUPPRESS_FILE_NAME = FileUtil.RUSEFI_SETTINGS_FOLDER + "donotdownload";
-    private static final boolean suppressDownloadViaFlagFile = new File(SUPPRESS_FILE_NAME).exists();
-
-    static {
-        doNotDownloadPropertyValue = Boolean.getBoolean(DO_NOT_UPDATE_PROPERTY_KEY);
-        log.info(DO_NOT_UPDATE_PROPERTY_KEY + "=" + doNotDownloadPropertyValue);
-        log.info(SUPPRESS_FILE_NAME + " exists: " + suppressDownloadViaFlagFile);
-    }
+    private static final int AUTOUPDATE_VERSION = 20260309; // separate from rusEFIVersion#CONSOLE_VERSION
+    private static final String userHomeSubDirectory = FileUtil.RUSEFI_SETTINGS_FOLDER + "updates" + File.separator;
 
     private static final String TITLE = getTitle();
 
@@ -49,6 +49,10 @@ public class Autoupdate {
             log.error("Error", e);
             return "Title error: " + e;
         }
+    }
+
+    static {
+        log.info("java=" + System.getProperty("java.version"));
     }
 
     public static void main(String[] args) {
@@ -91,7 +95,8 @@ public class Autoupdate {
         @NotNull String firstArgument = args.length > 0 ? args[0] : "";
 
         final Optional<DownloadedAutoupdateFileInfo> downloadedAutoupdateFile;
-        if (doNotDownloadPropertyValue || suppressDownloadViaFlagFile) {
+        if (!AutoupdateProperty.get()) {
+            log.info(AutoupdateProperty.AUTO_UPDATE_BUNDLE_PROPERTY + " says 'do not update'");
             downloadedAutoupdateFile = Optional.empty();
         } else {
             downloadedAutoupdateFile = downloadFreshZipFile(firstArgument, bundleInfo);
@@ -104,7 +109,7 @@ public class Autoupdate {
         // java lazy class-loader would get broken if we replace rusefi_autoupdate.jar file
         // ATTENTION! To avoid `ClassNotFoundException` we need to load all necessary classes before unzipping
         // autoupdate archive
-        safeUnzipMakingSureClassloaderIsHappy(downloadedAutoupdateFile);
+        unzipAutoUpdate(downloadedAutoupdateFile);
         startConsoleAsANewProcess(consoleExeFileName, args);
     }
 
@@ -122,7 +127,8 @@ public class Autoupdate {
         return downloadedAutoupdateFile;
     }
 
-    private static void safeUnzipMakingSureClassloaderIsHappy(Optional<DownloadedAutoupdateFileInfo> downloadedAutoupdateFile) {
+    private static void unzipAutoUpdate(Optional<DownloadedAutoupdateFileInfo> downloadedAutoupdateFile) {
+        log.info("unzipAutoUpdate " + downloadedAutoupdateFile);
         // todo: we still have technical debt here! https://github.com/rusefi/rusefi/issues/7971
         downloadedAutoupdateFile.ifPresent(Autoupdate::unzipFreshConsole);
         downloadedAutoupdateFile.ifPresent(autoupdateFile -> {
@@ -181,6 +187,9 @@ public class Autoupdate {
         return downloadAutoupdateZipFile(bundleInfo, branchUrl, FindFileHelper.isObfuscated());
     }
 
+    /**
+     * rusefi_console.exe/invokes rusefi_console.jar - entry point is Launcher#main
+     */
     private static void startConsoleAsANewProcess(final String consoleExeFileName, final String[] args) {
         if (!Files.exists(Paths.get(consoleExeFileName))) {
             log.error(String.format("File `%s` to launch isn't found", consoleExeFileName));
@@ -220,16 +229,29 @@ public class Autoupdate {
     }
 
     /**
+     * sad fact: java does not have a way to poll 'shift' key state, modifiers are only available via InputEvents!
+     */
+    private static boolean isSkipUpdater() {
+        return Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
+    }
+
+
+    /**
      * @return empty if we already have latest, or in case of error
      */
     public static Optional<DownloadedAutoupdateFileInfo> downloadAutoupdateZipFile(
         final BundleInfo info,
         final String baseUrl,
         boolean isObfuscated) {
+        if (isSkipUpdater()) {
+            log.info("User wants to skip auto-update");
+            return Optional.empty();
+        }
+
         try {
             String suffix = isObfuscated ? "_obfuscated_public" : "";
             String folderName = info.getTarget() + "_" + info.getBranchName();
-            String localFolder = FileUtil.RUSEFI_SETTINGS_FOLDER + "updates" + File.separator + folderName + File.separator;
+            String localFolder = userHomeSubDirectory + folderName + File.separator;
             new File(localFolder).mkdirs();
 
             String fileName = ConnectionAndMeta.getWhiteLabel(ConnectionAndMeta.getProperties()) + "_bundle_" + info.getTarget() + suffix + "_autoupdate" + ".zip";

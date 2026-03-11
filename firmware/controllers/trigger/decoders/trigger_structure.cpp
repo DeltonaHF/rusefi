@@ -423,6 +423,15 @@ uint16_t TriggerWaveform::findAngleIndex(TriggerFormDetails *details, angle_t ta
 	return left;
 }
 
+TriggerWheel TriggerWaveform::getWheel(size_t index) {
+#if EFI_UNIT_TEST
+	return triggerSignalIndeces[index];
+#else
+  UNUSED(index);
+#endif
+	return TriggerWheel::T_PRIMARY;
+}
+
 void TriggerWaveform::setShapeDefinitionError(bool value) {
 	shapeDefinitionError = value;
 }
@@ -484,6 +493,10 @@ void TriggerWaveform::initializeTriggerWaveform(operation_mode_e triggerOperatio
 
 	case trigger_type_e::TT_SUZUKI_G13B:
 		initializeSuzukiG13B(this);
+		break;
+
+	case trigger_type_e::TT_SUZUKI_G16B:
+		initializeSuzukiG16B(this);
 		break;
 
 	case trigger_type_e::TT_FORD_TFI_PIP:
@@ -730,7 +743,9 @@ void TriggerWaveform::initializeTriggerWaveform(operation_mode_e triggerOperatio
 	    initializeMitsubishi4g63Cam(this);
 		break;
 
-	case trigger_type_e::TT_UNUSED29:
+	case trigger_type_e::TT_NISSAN_K11:
+	  initializeNissanK11(this);
+    break;
 	case trigger_type_e::TT_HONDA_CBR_600:
 		configureHondaCbr600(this);
 		break;
@@ -836,6 +851,7 @@ void TriggerWaveform::initializeTriggerWaveform(operation_mode_e triggerOperatio
 		initializeJeepRenix66_2_2(this);
 		break;
 
+	case trigger_type_e::TT_UNUSED_96:
 	case trigger_type_e::TT_SUBARU_7_6_CRANK:
 		initializeSubaru7_6_crankOnly(this);
 		break;

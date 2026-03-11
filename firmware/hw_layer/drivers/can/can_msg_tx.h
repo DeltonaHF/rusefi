@@ -17,7 +17,7 @@
 
 #if EFI_SIMULATOR || EFI_UNIT_TEST
 #include "fifo_buffer.h"
-extern fifo_buffer<CANTxFrame, 1024> txCanBuffer;
+extern fifo_buffer<CANTxFrame, TEST_CAN_BUFFER_SIZE> txCanBuffer;
 #endif // EFI_SIMULATOR
 
 /**
@@ -83,7 +83,7 @@ public:
 	}
 
     void setArray(const uint8_t *data, size_t len) {
-        for (size_t i = 0; i < std::min(len, size_t(8)); i++) {
+        for (size_t i = 0; i < std::min(len, sizeof(m_frame.data8)); i++) {
             m_frame.data8[i] = data[i];
         }
     }

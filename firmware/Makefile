@@ -182,11 +182,12 @@ ifeq ($(USE_EXCEPTIONS_STACKSIZE),)
   USE_EXCEPTIONS_STACKSIZE = 0x1000
 endif
 
-# and this is not working for be :( See https://github.com/rusefi/rusefi/issues/638
 # use -j4 unless some value was specified
 NUMJOBS=${NUMJOBS:-" -j4 "}
+MAKEFLAGS += ${NUMJOBS} -r
 
-MAKEFLAGS += ${NUMJOBS}
+# less disk, more RAM
+# MAKEFLAGS += -pipe
 
 #
 # Architecture or project specific options
@@ -455,3 +456,5 @@ CLEAN_BUNDLE_HOOK:
 POST_MAKE_ALL_RULE_HOOK: $(BUILDDIR)/$(PROJECT).elf
 	@java -jar ../java_tools/gcc_map_reader.jar $(BUILDDIR)/$(PROJECT).map | grep Total || echo Unable to run gcc_map_reader
 	@$(TRGT)objdump -h $(BUILDDIR)/$(PROJECT).elf | grep -w ram4
+
+VPATH     = $(patsubst ./%,%,$(SRCPATHS))

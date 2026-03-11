@@ -61,7 +61,7 @@ jobs:
         java-version: '17'
 
     - name: Code generation tools
-      working-directory: ./java_tools
+      working-directory: .
       run: ./gradlew :config_definition:shadowJar
 
     - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
@@ -138,7 +138,7 @@ jobs:
 
     - name: Upload CodeQL results as an artifact
       if: success() || failure()
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: codeql-results
         path: ${{ steps.step1.outputs.sarif-output }}

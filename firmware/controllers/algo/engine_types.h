@@ -129,8 +129,8 @@ enum class trigger_type_e : uint32_t {
 	// GM 24x with 5/10 degree gaps
 	TT_GM_24x_5 = 27,
 	TT_HONDA_CBR_600 = 28,
-	TT_UNUSED29 = 29,
-	// todo: we syspect that this one is broken while TT_JEEP_EVD_36_2_2 is potentially better?
+	TT_NISSAN_K11 = 29,
+	// todo: we suspect that this one is broken while TT_JEEP_EVD_36_2_2 is potentially better?
 	TT_CHRYSLER_NGC_36_2_2 = 30,
 	// skipped 3/1 with cam sensor for testing
 	TT_3_1_CAM = 31,
@@ -244,27 +244,38 @@ enum class trigger_type_e : uint32_t {
 
 	// symmetrical crank
 	TT_SUBARU_7_6_CRANK = 94,
+	TT_SUZUKI_G16B = 95,
+
+	TT_UNUSED_96 = 96,
 
 	// Crank trigger of Fiat - Lancia IAW. The full pattern consists of: 
 	//    a) CRANK: "4-tooth symmetric" wheel; 
 	//    b) CAM: "4 minus 2" wheel. Note: CAM trigger should be decoded through VVT.
-	TT_IAW_4_PLUS_2_CRANK = 95, 
+	TT_IAW_4_PLUS_2_CRANK = 97, 
 
 	// Crank trigger of Fiat - Lancia 4+1 Digiplex 2 and Digiplex 2s. The pattern consists of: 
 	//    a) CRANK 4 symmetric teeth 5 degrees off TDC (Tipo/Tempra: 5/95 deg ATDC; Thema 16v: 5/95 deg BTDC), and one additional tooth at #1 and #4 TDC (also used for sync)
-	TT_DIGIPLEX_4_PLUS_1_CRANK = 96, 
+	TT_DIGIPLEX_4_PLUS_1_CRANK = 98, 
 
-	TT_43_CRANK = 97,
-	TT_129DIV3PLUS1_CRANK = 98,
-
+	TT_43_CRANK = 99,
+	TT_129DIV3PLUS1_CRANK = 100,
 
 	// do not forget to edit "#define trigger_type_e_enum" line in integration/rusefi_config.txt file to propogate new value to rusefi.ini TS project
 	// do not forget to invoke "gen_config.bat" once you make changes to integration/rusefi_config.txt
+
+	// TL,DR https://github.com/rusefi/rusefi/commit/523805138589585cc8889d6afd9305d120180902 example of new trigger commit
+	//
+	// before you add a new trigger: did you have a chance to capture digital signal with a logic analyzer?
+	// see unit_tests/tests/trigger/resources/readme.md for some details
+	//
+	// do not forget to edit "#define trigger_type_e_enum" line in integration/rusefi_config.txt file to propagate new value to rusefi.ini TS project
+	//
 	// todo: one day a hero would integrate some of these things into Makefile in order to reduce manual magic
 	//
 	// Another point: once you add a new trigger, run get_trigger_images.bat which would run rusefi_test.exe from unit_tests
 	//
-	TT_UNUSED = 99, // this is used if we want to iterate over all trigger types
+
+	TT_UNUSED = 101, // this is used if we want to iterate over all trigger types
 };
 
 typedef enum {
@@ -303,6 +314,9 @@ typedef enum {
 	TS_GRAB_TPS_CLOSED = 0x20,
 	TS_GRAB_TPS_OPEN = 0x21,
 	TS_WIDEBAND_UPDATE_FILE = 0x22,
+	TS_ESTIMATE_TORQUE_TABLE = 0x23,
+	TS_ETB_BENCH_TEST_0 = 0x24,
+	TS_ETB_BENCH_TEST_1 = 0x25,
 } ts_14_command;
 
 typedef enum {
@@ -346,6 +360,7 @@ typedef enum {
 	TS_STOP_ENGINE = 36,
 	TS_WIDEBAND_SET_SENS_BY_ID = 37,
 	TS_WIDEBAND_FLASH_BY_ID_FILE = 38,
+	TS_WIDEBAND_RESTART = 39,
 } ts_command_e;
 
 typedef enum {

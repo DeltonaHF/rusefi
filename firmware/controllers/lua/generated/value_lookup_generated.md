@@ -10,6 +10,15 @@ set rpm_hard_limit X
 ### engineSnifferRpmThreshold
 Engine sniffer would be disabled above this rpm\nset engineSnifferRpmThreshold X
 
+### ltitEnabled
+Enable LTIT (Long Term Idle Trim) learning
+
+### useMetricOnInterface
+
+
+### useLambdaOnInterface
+
+
 ### multisparkMaxRpm
 Disable multispark above this engine speed.
 
@@ -30,9 +39,6 @@ Voltage when the idle valve is closed.\nYou probably don't have one of these!
 
 ### idlePositionMax
 Voltage when the idle valve is open.\nYou probably don't have one of these!\n1 volt = 1000 units
-
-### ltitEnabled
-Enable LTIT (Long Term Idle Trim) learning
 
 ### ltitEmaAlpha
 EMA filter constant for LTIT (0-255)
@@ -203,7 +209,7 @@ kPa/psi value at low volts
 kPa/psi value at high volts
 
 ### clt.config.tempC_1
-these values are in Celcius
+
 
 ### clt.config.tempC_2
 
@@ -224,7 +230,7 @@ these values are in Celcius
 Pull-up resistor value on your board
 
 ### iat.config.tempC_1
-these values are in Celcius
+
 
 ### iat.config.tempC_2
 
@@ -788,7 +794,7 @@ Write SD card log even when powered by USB
 Second harmonic (aka double) is usually quieter background noise
 
 ### yesUnderstandLocking
-
+Unlocking only via rusEFI console using 'unlock PICODEBUG' command. Use 'reset to default firmware' if pincode is lost.
 
 ### silentTriggerError
 Sometimes we have a performance issue while printing error
@@ -962,7 +968,16 @@ set warningPeriod X
 
 
 ### torqueReductionArmingApp
-Pedal position to realize that we need to reduce torque when the trigger pin is uuuh triggered
+Pedal position to realize that we need to reduce torque when the trigger pin is triggered
+
+### referenceTorqueForGenerator
+null
+
+### referenceMapForGenerator
+null
+
+### referenceVeForGenerator
+null
 
 ### tachPulseDuractionMs
 Duration in ms or duty cycle depending on selected mode
@@ -1274,7 +1289,7 @@ Delay to allow fuel pressure to build before firing the priming pulse.
 This is the pressure at which your injector flow is known.\nFor example if your injectors flow 400cc/min at 3.5 bar, enter 350kpa/50.7psi here.\nThis is gauge pressure/in reference to atmospheric.
 
 ### auxTempSensor1.config.tempC_1
-these values are in Celcius
+
 
 ### auxTempSensor1.config.tempC_2
 
@@ -1295,7 +1310,7 @@ these values are in Celcius
 Pull-up resistor value on your board
 
 ### auxTempSensor2.config.tempC_1
-these values are in Celcius
+
 
 ### auxTempSensor2.config.tempC_2
 
@@ -1685,7 +1700,7 @@ How long it takes to remove initial IAC adder to return to normal idle.
 Scale the reported vehicle speed value from CAN. Example: Parameter set to 1.1, CAN VSS reports 50kph, ECU will report 55kph instead.
 
 ### oilTempSensor.config.tempC_1
-these values are in Celcius
+
 
 ### oilTempSensor.config.tempC_2
 
@@ -1706,7 +1721,7 @@ these values are in Celcius
 Pull-up resistor value on your board
 
 ### fuelTempSensor.config.tempC_1
-these values are in Celcius
+
 
 ### fuelTempSensor.config.tempC_2
 
@@ -1727,7 +1742,7 @@ these values are in Celcius
 Pull-up resistor value on your board
 
 ### ambientTempSensor.config.tempC_1
-these values are in Celcius
+
 
 ### ambientTempSensor.config.tempC_2
 
@@ -1748,7 +1763,7 @@ these values are in Celcius
 Pull-up resistor value on your board
 
 ### compressorDischargeTemperature.config.tempC_1
-these values are in Celcius
+
 
 ### compressorDischargeTemperature.config.tempC_2
 
@@ -1990,6 +2005,30 @@ Rotational Idle Auto engage CLT.
 ### tcu_shiftTime
 
 
+### cel_battery_min_v
+"Minimum Battery Voltage"
+
+### cel_battery_max_v
+"Maximum Battery Voltage"
+
+### cel_map_min_v
+"Minimum MAP V"
+
+### cel_map_max_v
+"Maximum MAP V"
+
+### cel_iat_min_v
+"Minimum IAT V"
+
+### cel_iat_max_v
+"Maximum IAT V"
+
+### cel_tps_min_v
+"Minimum TPS V"
+
+### cel_tps_max_v
+"Maximum TPS V"
+
 ### dynoRpmStep
 @@DYNO_RPM_STEP_TOOLTIP@@
 
@@ -2031,4 +2070,22 @@ Rotational Idle Auto engage CLT.
 
 ### dynoCarFrontalAreaM2
 @@DYNO_CAR_FRONTAL_AREA_TOOLTIP@@
+
+### wizardNumberOfCylinders
+
+
+### wizardFiringOrder
+
+
+### wizardMapSensorType
+
+
+### wizardCrankTrigger
+
+
+### wizardCamTrigger
+
+
+### wizardInjectorFlow
+
 

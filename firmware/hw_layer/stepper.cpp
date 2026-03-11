@@ -36,6 +36,8 @@ void StepperMotorBase::saveStepperPos(int pos) {
 	// use backup-power RTC registers to store the data
 #if EFI_PROD_CODE && EFI_BACKUP_SRAM
 	backupRamSave(backup_ram_e::StepperPosition, pos + 1);
+#else
+  UNUSED(pos);
 #endif
 	postCurrentPosition();
 }
@@ -173,10 +175,6 @@ void StepDirectionStepper::setDirection(bool isIncrementing) {
 }
 
 bool StepDirectionStepper::pulse() {
-	// we move the motor only of it is powered from the main relay
-	if (!engine->isMainRelayEnabled())
-		return false;
-
 	enablePin.setValue(false); // enable stepper
 
 	stepPin.setValue(true);

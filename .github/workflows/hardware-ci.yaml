@@ -85,7 +85,7 @@ jobs:
       run: arm-none-eabi-gcc -v
 
     - name: Configuration Definition and Enum to String CI, without pushing new .jar
-      working-directory: ./java_tools
+      working-directory: .
       run: |
         ./gradlew :config_definition:shadowJar :enum_to_string:shadowJar
 
@@ -132,13 +132,13 @@ jobs:
         st-flash --format=binary --reset --connect-under-reset write firmware/deliver/rusefi.bin 0x08000000
 
     - name: Upload build bin artifact
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: rusefi_hw-ci-${{matrix.build-target}}.bin
         path: ./firmware/build/rusefi*.bin
 
     - name: Upload .ini artifact
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: rusefi_hw-ci-${{matrix.build-target}}.ini
         path: ${{matrix.test-suite-ini}}

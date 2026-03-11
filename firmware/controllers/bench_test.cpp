@@ -26,6 +26,7 @@
 #include "long_term_fuel_trim.h"
 #include "can_common.h"
 #include "can_rx.h"
+#include "torque_estimator.h"
 #include "value_lookup.h"
 #include "can_msg_tx.h"
 #include "gm_sbc.h" // setStepperHw
@@ -299,11 +300,11 @@ void fuelPumpBench() {
 	fuelPumpBenchExt(BENCH_FUEL_PUMP_DURATION);
 }
 
-static void vvtValveBench(int vvtIndex) {
 #if EFI_VVT_PID
+static void vvtValveBench(int vvtIndex) {
 	pinbench(BENCH_VVT_DURATION, 100.0, 1, getVvtOutputPin(vvtIndex));
-#endif // EFI_VVT_PID
 }
+#endif // EFI_VVT_PID
 
 static void requestWidebandUpdate(int hwIndex, bool fromFile)
 {
@@ -362,6 +363,7 @@ int luaCommandCounters[LUA_BUTTON_COUNT] = {};
 
 void handleBenchCategory(uint16_t index) {
 	switch(index) {
+#if EFI_VVT_PID
 	case BENCH_VVT0_VALVE:
 	    vvtValveBench(0);
 		return;
@@ -374,6 +376,7 @@ void handleBenchCategory(uint16_t index) {
 	case BENCH_VVT3_VALVE:
 	    vvtValveBench(3);
 		return;
+#endif // EFI_VVT_PID
 	case BENCH_AUXOUT0:
 	    auxOutBench(0);
 		return;
@@ -560,7 +563,13 @@ static void handleCommandX14(uint16_t index) {
 			etbAutocal(DC_Throttle1, false);
 		return;
 	case TS_ETB_AUTOCAL_1_FAST:
-			etbAutocal(DC_Throttle2, false);
+		etbAutocal(DC_Throttle2, false);
+		return;
+	case TS_ETB_BENCH_TEST_0:
+		etbBenchTestStart(0);
+		return;
+	case TS_ETB_BENCH_TEST_1:
+		etbBenchTestStart(1);
 		return;
 	case TS_ETB_START_AUTOTUNE:
 			engine->etbAutoTune = true;
@@ -585,6 +594,10 @@ static void handleCommandX14(uint16_t index) {
 	case TS_WIDEBAND_UPDATE_FILE:
 		// broadcast, for old WBO FWs
 		requestWidebandUpdate(0xff, index == TS_WIDEBAND_UPDATE_FILE);
+		return;
+	case TS_ESTIMATE_TORQUE_TABLE:
+	  estimateTorqueTable();
+	  onApplyPreset();
 		return;
 	case COMMAND_X14_UNUSED_15:
 		return;
@@ -780,6 +793,11 @@ void executeTSCommand(uint16_t subsystem, uint16_t index) {
 			requestWidebandUpdate(widebandUpdateHwId, subsystem == TS_WIDEBAND_FLASH_BY_ID_FILE);
 		}
 		break;
+
+	case TS_WIDEBAND_RESTART:
+		restartWideband();
+		break;
+
 #endif // EFI_CAN_SUPPORT
 	case TS_BENCH_CATEGORY:
 		handleBenchCategory(index);
