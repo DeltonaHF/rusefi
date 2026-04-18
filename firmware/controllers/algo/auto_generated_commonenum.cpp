@@ -1,6 +1,6 @@
 #include "global.h"
 #include "rusefi_enums.h"
-// was generated automatically by rusEFI tool  from rusefi_enums.h // by enum_to_string.jar tool on Sat Apr 04 11:57:46 UTC 2026
+// was generated automatically by rusEFI tool  from rusefi_enums.h // by enum_to_string.jar tool on Sat Apr 18 22:37:15 UTC 2026
 // see also gen_config_and_enums.bat
 
 
@@ -886,10 +886,14 @@ const char *getNitrous_arming_method_e(nitrous_arming_method_e value) {
 }
 const char *getOperation_mode_e(operation_mode_e value) {
 	switch (value) {
+		case FOUR_STROKE_43_TIMES_CRANK_SENSOR:
+			return "FOUR_STROKE_43_TIMES_CRANK_SENSOR";
 		case FOUR_STROKE_CAM_SENSOR:
 			return "FOUR_STROKE_CAM_SENSOR";
 		case FOUR_STROKE_CRANK_SENSOR:
 			return "FOUR_STROKE_CRANK_SENSOR";
+		case FOUR_STROKE_FOUR_TIMES_CRANK_SENSOR:
+			return "FOUR_STROKE_FOUR_TIMES_CRANK_SENSOR";
 		case FOUR_STROKE_SIX_TIMES_CRANK_SENSOR:
 			return "FOUR_STROKE_SIX_TIMES_CRANK_SENSOR";
 		case FOUR_STROKE_SYMMETRICAL_CRANK_SENSOR:
@@ -1096,6 +1100,8 @@ const char *getVvt_mode_e(vvt_mode_e value) {
 			return "VVT_HONDA_K_INTAKE";
 		case VVT_HR12DDR_IN:
 			return "VVT_HR12DDR_IN";
+		case VVT_IAW_4_PLUS_2_CAM:
+			return "VVT_IAW_4_PLUS_2_CAM";
 		case VVT_INACTIVE:
 			return "VVT_INACTIVE";
 		case VVT_MAP_V_TWIN:

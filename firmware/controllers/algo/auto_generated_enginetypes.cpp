@@ -1,6 +1,6 @@
 #include "global.h"
 #include "engine_types.h"
-// was generated automatically by rusEFI tool  from engine_types.h // by enum_to_string.jar tool on Sun Apr 12 14:49:20 UTC 2026
+// was generated automatically by rusEFI tool  from engine_types.h // by enum_to_string.jar tool on Sat Apr 18 22:37:16 UTC 2026
 // see also gen_config_and_enums.bat
 
 
@@ -201,6 +201,8 @@ const char *getDebug_mode_e(debug_mode_e value) {
 }
 const char *getTrigger_type_e(trigger_type_e value) {
 	switch (value) {
+		case trigger_type_e::TT_129DIV3PLUS1_CRANK:
+			return "TT_129DIV3PLUS1_CRANK";
 		case trigger_type_e::TT_12_TOOTH_CRANK:
 			return "TT_12_TOOTH_CRANK";
 		case trigger_type_e::TT_2JZ_3_34_SIMULATION_ONLY:
@@ -215,6 +217,8 @@ const char *getTrigger_type_e(trigger_type_e value) {
 			return "TT_3_1_CAM";
 		case trigger_type_e::TT_3_TOOTH_CRANK:
 			return "TT_3_TOOTH_CRANK";
+		case trigger_type_e::TT_43_CRANK:
+			return "TT_43_CRANK";
 		case trigger_type_e::TT_60DEG_TOOTH:
 			return "TT_60DEG_TOOTH";
 		case trigger_type_e::TT_60_2_2_F3R:
@@ -241,6 +245,8 @@ const char *getTrigger_type_e(trigger_type_e value) {
 			return "TT_DAIHATSU_4_CYL";
 		case trigger_type_e::TT_DEV:
 			return "TT_DEV";
+		case trigger_type_e::TT_DIGIPLEX_4_PLUS_1_CRANK:
+			return "TT_DIGIPLEX_4_PLUS_1_CRANK";
 		case trigger_type_e::TT_DODGE_NEON_1995:
 			return "TT_DODGE_NEON_1995";
 		case trigger_type_e::TT_DODGE_NEON_2003_CAM:
@@ -279,6 +285,8 @@ const char *getTrigger_type_e(trigger_type_e value) {
 			return "TT_HONDA_K_CAM_4_1";
 		case trigger_type_e::TT_HONDA_K_CRANK_12_1:
 			return "TT_HONDA_K_CRANK_12_1";
+		case trigger_type_e::TT_IAW_4_PLUS_2_CRANK:
+			return "TT_IAW_4_PLUS_2_CRANK";
 		case trigger_type_e::TT_JEEPRENIX_66_2_2_2:
 			return "TT_JEEPRENIX_66_2_2_2";
 		case trigger_type_e::TT_JEEP_18_2_2_2:
