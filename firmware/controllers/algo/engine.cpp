@@ -581,7 +581,7 @@ EngineState * getEngineState() {
 	return &engine->engineState;
 }
 
-TunerStudioOutputChannels *getTunerStudioOutputChannels() {
+output_channels_s *getTunerStudioOutputChannels() {
 	return &engine->outputChannels;
 }
 

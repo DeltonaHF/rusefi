@@ -21,8 +21,8 @@ typedef enum __attribute__ ((__packed__)) {
 	DBG_0 = 0,
 	DBG_1 = 1,
 	DBG_2 = 2,
-	DBG_STEPPER_IDLE_CONTROL = 3,
-	DBG_EL_ACCEL = 4,
+	DBG_3 = 3,
+	DBG_4 = 4,
 	DBG_5 = 5,
 	DBG_6 = 6,
 	DBG_7 = 7,
@@ -32,7 +32,7 @@ typedef enum __attribute__ ((__packed__)) {
 	DBG_11 = 11,
 	DBG_12 = 12,
 	DBG_13 = 13,
-	DBG_SR5_PROTOCOL = 14,
+	DBG_14 = 14,
 	DBG_KNOCK = 15,
 	DBG_16 = 16,
 	/**
@@ -147,7 +147,7 @@ enum class trigger_type_e : uint32_t {
 	// this one is 6 cylinder, see TT_JEEP_4_cyl for 4 cylinders
 	TT_JEEP_18_2_2_2 = 37,
 	TT_12_TOOTH_CRANK = 38,
-	TT_DODGE_NEON_1995_ONLY_CRANK = 39,
+	TT_FORD_TFI_PIP_6 = 39,
 	// Jeep XJ 2500cc 4 cylinder. See also TT_JEEP_18_2_2_2 for 6 cylinders
 	TT_JEEP_4_CYL = 40,
 	// magneti marelli Fiat/Lancia IAW P8 from the 90', 2.0 16 v turbo engine - Lancia Coupe
@@ -171,6 +171,20 @@ enum class trigger_type_e : uint32_t {
 	TT_NISSAN_MR18_CAM_VVT = 52,
 	// https://rusefi.com/forum/viewtopic.php?f=5&t=1912
 	// also known as Audi 5 Cyl
+	/**
+	Audi 5 Cyl Tri Tach is the most known example of early EFI reading flywheel gear teeth as crank trigger wheel
+	French had a 145 tooth version
+  these do not fit universal rusEFI trigger decoder well
+  see FOUR_STROKE_TWELVE_TIMES_CRANK_SENSOR for one incompatibility
+  see PWM_PHASE_MAX_COUNT for another problematic area
+
+  a solution could be a hardware or software pre-scaler which would have to be reset at well known points, probably meaning by cam shaft
+  and some custom code to approach synchronization point differently
+
+  while we have half a dozen of interests regarding 1980s compatibility, this ares is definitely not a priority
+
+  for any contribution to be taken seriously it has to start with logic analyzer data as described at unit_tests/tests/trigger/resources/readme.md
+	*/
 	TT_TRI_TACH = 53,
 	TT_GM_60_2_2_2 = 54,
 	// * https://rusefi.com/forum/viewtopic.php?f=5&t=1937
@@ -185,7 +199,7 @@ enum class trigger_type_e : uint32_t {
 	TT_VVT_MITSUBISHI_3A92 = 62,
 	TT_SUBARU_SVX_CRANK_1 = 63,
 	TT_SUBARU_SVX_CAM_VVT = 64,
-	TT_FORD_TFI_PIP = 65,
+	TT_FORD_TFI_PIP_8 = 65,
 	TT_SUZUKI_G13B = 66,
 	// * Honda K exhaust cam shaft
 	TT_HONDA_K_CAM_4_1 = 67,
@@ -244,6 +258,8 @@ enum class trigger_type_e : uint32_t {
 
 	// symmetrical crank
 	TT_SUBARU_7_6_CRANK = 94,
+
+	// we assume this is NOT ready/NOT working? https://github.com/rusefi/rusefi/pull/9262
 	TT_SUZUKI_G16B = 95,
 
 	TT_UNUSED_96 = 96,
@@ -320,7 +336,7 @@ typedef enum {
 } ts_14_command;
 
 typedef enum {
-	TS_DEBUG_MODE = 0,
+	TS_UNUSED_0 = 0,
 	TS_COMMAND_1 = 1,
 	TS_COMMAND_2 = 2,
 	TS_COMMAND_3 = 3,

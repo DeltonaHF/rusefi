@@ -2,6 +2,7 @@
 
 #include "rusefi_lua.h"
 #include "lua_hooks.h"
+#include "second_tables.h"
 
 #include "lua_biquad.h"
 #include "fuel_math.h"
@@ -390,26 +391,6 @@ static int lua_getAuxDigital(lua_State* l) {
 #endif // !EFI_SIMULATOR
 
 	return 1;
-}
-
-static int lua_setDebug(lua_State* l) {
-	// wrong debug mode, ignore
-	if (engineConfiguration->debugMode != DBG_LUA) {
-		return 0;
-	}
-
-	auto idx = luaL_checkinteger(l, 1);
-	auto val = luaL_checknumber(l, 2);
-
-	// invalid index, ignore
-	if (idx < 1 || idx > 7) {
-		return 0;
-	}
-
-	auto firstDebugField = &engine->outputChannels.debugFloatField1;
-	firstDebugField[idx - 1] = val;
-
-	return 0;
 }
 
 #if EFI_ENGINE_CONTROL
@@ -1031,9 +1012,9 @@ extern int luaCommandCounters[LUA_BUTTON_COUNT];
 
  	  // here we assume load is TPS
 		auto result = interpolate3d(
-                  		config->torqueTable,
-                  		config->torqueLoadBins, tps,
-                  		config->torqueRpmBins, rpm
+                  		secondTablesGetState()->torqueTable,
+                  		secondTablesGetState()->torqueLoadBins, tps,
+                  		secondTablesGetState()->torqueRpmBins, rpm
                   	);
 		lua_pushnumber(l, result);
 		return 1;
@@ -1134,7 +1115,6 @@ extern int luaCommandCounters[LUA_BUTTON_COUNT];
                                  	});
 	lua_register(lState, "getDigital", lua_getDigital);
 	lua_register(lState, "getAuxDigital", lua_getAuxDigital);
-	lua_register(lState, "setDebug", lua_setDebug);
 #if EFI_ENGINE_CONTROL
 	lua_register(lState, "getAirmass", lua_getAirmass);
 	lua_register(lState, "setAirmass", lua_setAirmass);

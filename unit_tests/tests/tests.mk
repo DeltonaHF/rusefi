@@ -28,6 +28,7 @@ TESTS_SRC_CPP = \
 	tests/trigger/test_real_ford_coyote.cpp \
 	tests/trigger/test_real_volkswagen.cpp \
 	tests/trigger/test_real_nb2_cranking.cpp \
+	tests/trigger/test_real_neon.cpp \
 	tests/trigger/test_real_gm_24x.cpp \
 	tests/trigger/test_real_nissan_hr.cpp \
 	tests/trigger/test_real_nissan_hr_vvt.cpp \
@@ -194,6 +195,7 @@ TESTS_SRC_CPP = \
 	tests/actuators/boost/test_open_loop_multipliers.cpp \
 	tests/actuators/boost/test_closed_loop_adders.cpp \
 	tests/controllers/can/test_can_rx.cpp \
+	tests/controllers/can/test_can_msg_tx.cpp \
 	tests/controllers/can/test_can_serial.cpp \
 	tests/controllers/can/test_can_wideband.cpp \
 	tests/controllers/can/test_obd2.cpp \
@@ -207,6 +209,7 @@ TESTS_SRC_CPP = \
 	tests/controllers/algo/test_closed_loop_idle.cpp \
 	tests/controllers/modules/test_example_module.cpp \
 	tests/controllers/test_flash.cpp \
+	tests/controllers/test_second_tables.cpp \
 	tests/controllers/modules/vvl_controller/vvl_controller_rpm_condition.cpp \
 	tests/controllers/modules/vvl_controller/vvl_controller_clt_condition.cpp \
 	tests/controllers/modules/vvl_controller/vvl_controller_tps_condition.cpp \
@@ -214,4 +217,5 @@ TESTS_SRC_CPP = \
 	tests/controllers/modules/vvl_controller/vvl_controller_afr_condition.cpp \
 	tests/controllers/modules/test_configuration_wizard.cpp \
 	tests/controllers/can/dash/test_can_bmw_e46.cpp \
-	tests/controllers/algo/rotational_idle/test_rotational_idle.cpp
+	tests/controllers/algo/rotational_idle/test_rotational_idle.cpp \
+	tests/bean/test_bean_logic.cpp

@@ -69,8 +69,7 @@ DRIVERS_FOLDER = $(FOLDER)/drivers
 UPDATE_FOLDER_SOURCES = \
   $(RUSEFI_CONSOLE_SETTINGS) \
   $(INI_FILE) \
-  ../misc/console_launcher/readme.html \
-  ../misc/console_launcher/rusefi_updater.exe
+  ../misc/console_launcher/readme.html
 
 FOLDER_SOURCES = \
   ../java_console/bin
@@ -83,14 +82,13 @@ endif
 UPDATE_CONSOLE_FOLDER_SOURCES = \
   $(CONSOLE_JAR) \
   $(BRANCH_REF_FILE) \
-  $(TS_PLUGIN_LAUNCHER_JAR) \
-  $(AUTOUPDATE_JAR)
+  $(TS_PLUGIN_LAUNCHER_JAR)
 
 # todo: remove BootCommander.exe once https://github.com/rusefi/rusefi/issues/6358 is done
 
 CONSOLE_FOLDER_SOURCES = \
-  ../misc/console_launcher/rusefi_autoupdate.exe \
   ../misc/console_launcher/rusefi_console.exe \
+  ../misc/console_launcher/rusefi_console.sh \
   $(SIMULATOR_EXE)
 
 #  $(wildcard ../java_console/*.dll) \

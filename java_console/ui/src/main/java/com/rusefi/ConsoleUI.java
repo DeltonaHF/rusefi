@@ -18,9 +18,13 @@ import com.rusefi.ui.engine.EngineSnifferPanel;
 import com.rusefi.ui.lua.LuaScriptPanel;
 import com.rusefi.ui.util.JustOneInstance;
 import com.rusefi.ui.widgets.ConnectionStatusIcon;
+import com.rusefi.ui.wizard.WizardContainer;
+import com.rusefi.io.ConnectionStatusLogic;
+import com.rusefi.io.ConnectionStatusValue;
 import com.rusefi.core.ui.AutoupdateUtil;
 import com.rusefi.util.LazyFile;
 import com.rusefi.util.LazyFileImpl;
+import org.jetbrains.annotations.NotNull;
 
 
 import javax.swing.*;
@@ -32,6 +36,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import static com.devexperts.logging.Logging.getLogging;
 import static com.rusefi.StartupFrame.setFrameIcon;
@@ -74,8 +80,29 @@ public class ConsoleUI {
         ConnectionStatusIcon connectionStatus = new ConnectionStatusIcon(linkManager);
 
         tabbedPane = new TabbedPanel(uiContext);
-        tabbedPane.setCornerComponent(connectionStatus);
         this.port = port;
+
+        // Wizard container and CardLayout for switching between console and wizard modes
+        JPanel rootPanel = new JPanel(new CardLayout());
+        rootPanel.add(tabbedPane.getContent(), "console");
+
+        WizardContainer wizardContainer = new WizardContainer(uiContext);
+        rootPanel.add(wizardContainer, "wizard");
+
+        CardLayout rootCardLayout = (CardLayout) rootPanel.getLayout();
+
+        JButton launchWizardButton = getLaunchWizardButton(rootPanel, wizardContainer, rootCardLayout);
+
+        wizardContainer.setOnWizardExit(() -> rootCardLayout.show(rootPanel, "console"));
+
+        JPanel cornerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        cornerPanel.setOpaque(false);
+        cornerPanel.add(connectionStatus);
+        cornerPanel.add(launchWizardButton);
+        tabbedPane.setCornerComponent(cornerPanel);
+
+        // ---------------
+
         MainFrame mainFrame = new MainFrame(this, tabbedPane);
         JFrame frame = mainFrame.getFrame().getFrame();
         setFrameIcon(frame);
@@ -133,7 +160,9 @@ console live data tab is broken #8402
             tabbedPane.addTab("Live Data", LiveDataPane.createLazy(uiContext).getContent());
  */
             tabbedPane.addTab("Tuning", new TuningPane(uiContext).getContent());
-            tabbedPane.addTab("Device", new DevicePane(uiContext, port, serialPortType).getContent());
+            tabbedPane.addTab("Knock Analyzer", new KnockPane(uiContext).getContent());
+            tabbedPane.addTab("Pinout", new PinoutPane(uiContext).getContent());
+            tabbedPane.addTab("Device", new DevicePane(uiContext, port, serialPortType, tabbedPane.tabbedPane).getContent());
         }
 
         if (!linkManager.isLogViewer() && false) // todo: fix it & better name?
@@ -177,7 +206,22 @@ console live data tab is broken #8402
         AutoupdateUtil.setAppIcon(mainFrame.getFrame().getFrame());
         log.info("showFrame");
 
-        mainFrame.getFrame().showFrame(tabbedPane.getContent());
+        mainFrame.getFrame().showFrame(rootPanel);
+    }
+
+    private @NotNull JButton getLaunchWizardButton(JPanel rootPanel, WizardContainer wizardContainer, CardLayout rootCardLayout) {
+        JButton launchWizardButton = new JButton("Launch Wizard");
+        launchWizardButton.addActionListener(e -> {
+            if (ConnectionStatusLogic.INSTANCE.getValue() != ConnectionStatusValue.CONNECTED) {
+                JOptionPane.showMessageDialog(rootPanel,
+                    "Please connect to an ECU before launching the wizard.",
+                    "Not Connected", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            wizardContainer.startWizard();
+            rootCardLayout.show(rootPanel, "wizard");
+        });
+        return launchWizardButton;
     }
 
     public String getPort() {
@@ -195,6 +239,10 @@ console live data tab is broken #8402
     }
 
     static void startUi(String[] args) throws InterruptedException, InvocationTargetException {
+        startUi(args, null);
+    }
+
+    static void startUi(String[] args, AtomicReference<Consumer<String>> bannerCallback) throws InterruptedException, InvocationTargetException {
         if (ConnectionAndMeta.saveReadmeHtmlToFile()) {
             new Thread(ConsoleUI::writeReadmeFile).start();
         }
@@ -203,7 +251,7 @@ console live data tab is broken #8402
         AutotestLogging.suspendLogging = getConfig().getRoot().getBoolProperty(GaugesPanel.DISABLE_LOGS);
         commonUiStartup();
 // not very useful?        VersionChecker.start();
-        SwingUtilities.invokeAndWait(() -> awtCode(args));
+        SwingUtilities.invokeAndWait(() -> awtCode(args, bannerCallback));
     }
 
     /**
@@ -214,7 +262,7 @@ console live data tab is broken #8402
         tabbedPane.addTab(title, component);
     }
 
-    private static void awtCode(String[] args) {
+    private static void awtCode(String[] args, AtomicReference<Consumer<String>> bannerCallback) {
         if (JustOneInstance.isAlreadyRunning()) {
             int result = JOptionPane.showConfirmDialog(createOnTopParent(), "Looks like another instance is already running. Do you really want to start another instance?",
                 TITLE, JOptionPane.YES_NO_OPTION);
@@ -246,7 +294,10 @@ console live data tab is broken #8402
             } else {
                 for (String p : LinkManager.getCommPorts())
                     MessagesCentral.getInstance().postMessage(Launcher.class, "Available port: " + p);
-                new StartupFrame(ConnectivityContext.INSTANCE).showUi();
+                StartupFrame startupFrame = new StartupFrame(ConnectivityContext.INSTANCE);
+                if (bannerCallback != null)
+                    bannerCallback.set(startupFrame::showUpdateBanner);
+                startupFrame.showUi();
             }
 
         } catch (Throwable e) {
