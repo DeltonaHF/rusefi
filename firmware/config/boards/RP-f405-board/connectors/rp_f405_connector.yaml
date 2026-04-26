@@ -1,0 +1,259 @@
+# RP-f405-board connector definition
+# Generated from netlist RP_IAW_stm32f405.net (ground truth)
+# STM32F405RGT6 (LQFP64) on WeAct Studio F405 Core Board V1.1
+#
+# Field semantics (from frankenso_na6 reference):
+#   pin: connector pin number or any label - used for documentation only, arbitrary
+#   id:  the rusefi enum string PinoutLogic looks up:
+#          analog_inputs  -> EFI_ADC_0 .. EFI_ADC_N  (adc_channel_e)
+#          outputs        -> A0, B10, C1 ...           (Gpio_auto_enum, no P prefix)
+#          switch_inputs  -> PA0, PB2, PC5 ...         (brain_input_pin_e, with P prefix)
+#          event_inputs   -> PA0, PB2, PC5 ...         (brain_input_pin_e, with P prefix)
+#   ts_name: label shown in TunerStudio dropdown
+
+pins:
+
+  # -- ANALOG INPUTS ---------------------------------------------------------
+  # pin: = OEM ECU connector pin number for reference
+  # id:  = EFI_ADC_N where N = STM32 ADC channel number
+
+  - pin: 37
+    id: EFI_ADC_0
+    class: analog_inputs
+    ts_name: PA0 MAP Sensor
+    function: MAP sensor (ADC1_IN0 = PA0, 3.3 V max, op-amp buffered)
+    type: av
+
+  - pin: 38
+    id: EFI_ADC_1
+    class: analog_inputs
+    ts_name: PA1 TPS
+    function: Throttle position sensor (ADC1_IN1 = PA1, 3.3 V max, op-amp buffered)
+    type: av
+
+  - pin: 39
+    id: EFI_ADC_2
+    class: analog_inputs
+    ts_name: PA2 Knock Integrator
+    function: Knock sensor integrator output (ADC1_IN2 = PA2, 3.3 V max)
+    type: av
+
+  - pin: 40
+    id: EFI_ADC_3
+    class: analog_inputs
+    ts_name: PA3 CO Pot
+    function: CO-pot / mixture trim (ADC1_IN3 = PA3, 3.3 V max, op-amp buffered)
+    type: av
+
+  - pin: 41
+    id: EFI_ADC_4
+    class: analog_inputs
+    ts_name: PA4 IAT
+    function: Intake air temperature NTC (ADC1_IN4 = PA4, VoltageTableFunc)
+    type: at
+
+  - pin: 42
+    id: EFI_ADC_5
+    class: analog_inputs
+    ts_name: PA5 CLT
+    function: Coolant temperature NTC (ADC1_IN5 = PA5, VoltageTableFunc)
+    type: at
+
+  - pin: 43
+    id: EFI_ADC_6
+    class: analog_inputs
+    ts_name: PA6 Narrowband O2
+    function: Narrowband lambda sensor (ADC1_IN6 = PA6, 5 V scaled to 3.3 V)
+    type: av
+
+  - pin: 44
+    id: EFI_ADC_7
+    class: analog_inputs
+    ts_name: PA7 Aux Analog
+    function: Auxiliary analog input (ADC1_IN7 = PA7, 3.3 V max, op-amp buffered)
+    type: av
+
+  - pin: 45
+    id: EFI_ADC_10
+    class: analog_inputs
+    ts_name: PC0 Battery Voltage
+    function: Battery voltage sense (ADC1_IN10 = PC0, resistor divider to 3.3 V)
+    type: av
+
+  # -- TRIGGER / EVENT INPUTS (id: brain_input_pin_e, P prefix) -------------
+
+  - pin: 4
+    id: C6
+    class: event_inputs
+    ts_name: PC6 Crank Sensor (OEM pin 4)
+    function: Crank trigger sensor input, 5 V tolerant (CRS_5V_D_IN)
+
+  - pin: 23
+    id: C7
+    class: event_inputs
+    ts_name: PC7 Cam Sensor (OEM pin 23)
+    function: Cam trigger sensor input, 5 V tolerant (CAS_5V_D_IN)
+
+  - pin: vss
+    id: B13
+    class: event_inputs
+    ts_name: PB13 VSS
+    function: Vehicle speed sensor input, 3.3 V (VSS_3V3_D_IN)
+
+  # -- DIGITAL INPUTS (id: brain_input_pin_e, P prefix) ---------------------
+
+  - pin: 21
+    id: B2
+    class: switch_inputs
+    ts_name: PB2 AC Request (OEM pin 21)
+    function: A/C compressor request, 5 V tolerant (AC_5V_D_IN). PB2=BOOT1; pull-down at reset.
+
+  - pin: 8
+    id: B4
+    class: switch_inputs
+    ts_name: PB4 Aux Switch 1 (OEM pin 8)
+    function: Auxiliary switch digital input, 5 V tolerant (AuxSwt_5V_D_IN)
+
+  - pin: 14
+    id: B14
+    class: switch_inputs
+    ts_name: PB14 ABS Input (OEM pin 14)
+    function: ABS signal digital input, 5 V tolerant (ABS_5V_D_IN)
+
+  - pin: 13
+    id: C5
+    class: switch_inputs
+    ts_name: PC5 Aux Switch 2 (OEM pin 13)
+    function: Auxiliary switch digital input, 5 V tolerant (AuxSwt_5V_D_IN)
+
+  # -- IGNITION OUTPUTS (id: Gpio_auto_enum, no P prefix) -------------------
+
+  - pin: 25
+    id: C1
+    class: outputs
+    ts_name: PC1 Ignition 1 (OEM pin 25)
+    function: Ignition coil 1 output, 3.3 V logic (IGN1_3V3_D_OUT)
+    type: ign
+
+  - pin: 26
+    id: C2
+    class: outputs
+    ts_name: PC2 Ignition 2 (OEM pin 26)
+    function: Ignition coil 2 output, 3.3 V logic (IGN2_3V3_D_OUT)
+    type: ign
+
+  - pin: ign3
+    id: C3
+    class: outputs
+    ts_name: PC3 Ignition 3
+    function: Ignition coil 3 output, 3.3 V logic (IGN3_3V3_D_OUT)
+    type: ign
+
+  - pin: ign4
+    id: C4
+    class: outputs
+    ts_name: PC4 Ignition 4
+    function: Ignition coil 4 output, 3.3 V logic (IGN4_3V3_D_OUT)
+    type: ign
+
+  # -- INJECTOR OUTPUTS -----------------------------------------------------
+
+  - pin: 35
+    id: B10
+    class: outputs
+    ts_name: PB10 Injector 1 (OEM pin 35)
+    function: Fuel injector 1 low-side output (INJ1_D_OUT)
+    type: ls
+
+  - pin: 32
+    id: B11
+    class: outputs
+    ts_name: PB11 Injector 2 (OEM pin 32)
+    function: Fuel injector 2 low-side output (INJ2_D_OUT)
+    type: ls
+
+  - pin: 33
+    id: B15
+    class: outputs
+    ts_name: PB15 Injector 3 (OEM pin 33)
+    function: Fuel injector 3 low-side output (INJ3_D_OUT)
+    type: ls
+
+  - pin: 18
+    id: B12
+    class: outputs
+    ts_name: PB12 Injector 4 (OEM pin 18)
+    function: Fuel injector 4 low-side output (INJ4_D_OUT)
+    type: ls
+
+  # -- PWM / LOW-SIDE OUTPUTS -----------------------------------------------
+
+  - pin: 34
+    id: B0
+    class: outputs
+    ts_name: PB0 Idle Solenoid IAC (OEM pin 34)
+    function: Idle air control solenoid PWM, TIM3_CH3 AF2 (IAC_PWM_OUT)
+    type: ls
+
+  - pin: 27
+    id: B1
+    class: outputs
+    ts_name: PB1 Aux PWM (OEM pin 27)
+    function: Auxiliary PWM output, TIM3_CH4 AF2 (AUX_PWM_OUT)
+    type: ls
+
+  - pin: 7
+    id: B3
+    class: outputs
+    ts_name: PB3 EVAP Purge (OEM pin 7)
+    function: EVAP canister purge solenoid PWM, TIM2_CH2 AF1 (EVAP_PWM_OUT)
+    type: ls
+
+  - pin: 16
+    id: A15
+    class: outputs
+    ts_name: PA15 Overboost Valve OBV (OEM pin 16)
+    function: Boost control valve PWM, TIM2_CH1 AF1 (OBV_PWM_OUT). Remapped from JTDI at startup.
+    type: ls
+
+  # -- RELAY / LAMP OUTPUTS -------------------------------------------------
+
+  - pin: 12
+    id: B5
+    class: outputs
+    ts_name: PB5 MIL Warning Lamp (OEM pin 12)
+    function: Check-engine / MIL lamp output (MIL_D_OUT)
+    type: ls
+
+  - pin: 28
+    id: C13
+    class: outputs
+    ts_name: PC13 Fuel Pump Relay (OEM pin 28)
+    function: Fuel pump relay drive (FPRLY_D_OUT). PC13 has 3 mA limit - use driver stage.
+    type: ls
+
+  # -- RESERVED - NOT SHOWN IN TUNERSTUDIO -----------------------------------
+  # PA8   TFCARD_PRESENT  board hardwired SD detect
+  # PA9   USART1 TX       TunerStudio serial (SD1)
+  # PA10  USART1 RX       TunerStudio serial (SD1)
+  # PA11  USB OTG FS D-
+  # PA12  USB OTG FS D+
+  # PA13  SWDIO
+  # PA14  SWCLK
+  # PB6   I2C1 SCL
+  # PB7   I2C1 SDA
+  # PB8   CAN1 RX (AF9)
+  # PB9   CAN1 TX (AF9)
+  # PC8   SDIO D0
+  # PC9   SDIO D1
+  # PC10  SDIO D2
+  # PC11  SDIO D3
+  # PC12  SDIO CK
+  # PC14  OSC32_IN
+  # PC15  OSC32_OUT
+  # PD2   SDIO CMD
+
+info:
+  title: RP-f405-board
+  name: OEM ECU adapter (IAW-style, STM32F405RGT6)
+  directory: RP-f405-board
