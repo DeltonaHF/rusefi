@@ -568,6 +568,7 @@ public class VariableRegistryValues {
 	public static final int ETB_BIAS_CURVE_LENGTH = 8;
 	public static final int ETB_COUNT = 2;
 	public static final int ETB_HW_MAX_FREQUENCY = 3000;
+	public static final int ETHERNET_PORT = 29001;
 	public static final int FAN_PWM_CURVE_SIZE = 8;
 	public static final int FLASH_DATA_VERSION = 260407;
 	public static final int FLOW_LINEARIZATION_MASS_SIZE = 2;
@@ -706,7 +707,7 @@ public class VariableRegistryValues {
 	public static final String GAUGE_NAME_GEAR_RATIO = "Gearbox Ratio";
 	public static final String GAUGE_NAME_GYRO_YAW = "Gyro: Yaw rate";
 	public static final String GAUGE_NAME_IAC = "Idle: Position";
-	public static final String GAUGE_NAME_IAT = "IAT";
+	public static final String GAUGE_NAME_IAT = "Intake Air IAT";
 	public static final String GAUGE_NAME_IDLE_POSITION = "Idle: Position sensor";
 	public static final String GAUGE_NAME_IGNITION_LOAD = "Ignition: load";
 	public static final String GAUGE_NAME_IGNITION_MODE = "Ignition: Mode";
@@ -1279,6 +1280,7 @@ public class VariableRegistryValues {
 	public static final String KNOCK_RPM_TABLE_NAME = "Engine Knock Threshold RPM Based";
 	public static final int KNOCK_TABLE_RPM_SIZE = 6;
 	public static final int KNOCK_TABLE_SIZE = 6;
+	public static final int KnockGain_size = 36;
 	public static final int LAM_RPM_SIZE = 4;
 	public static final int LAM_SIZE = 4;
 	public static final int launchActivationMode_e_ALWAYS_ACTIVE_LAUNCH = 2;
@@ -1376,7 +1378,7 @@ public class VariableRegistryValues {
 	public static final int PEDAL_TO_TPS_SIZE = 8;
 	public static final String pedalSensor_NAME = "Accelerator pedal";
 	public static final String pedalToTpsTbl_NAME = "ETB pedal target";
-	public static final int persistent_config_s_size = 25892;
+	public static final int persistent_config_s_size = 26336;
 	public static final int pid_s_size = 20;
 	public static final int pin_input_mode_e_PI_DEFAULT = 0;
 	public static final int pin_input_mode_e_PI_INVERTED_DEFAULT = 4;
@@ -1520,7 +1522,7 @@ public class VariableRegistryValues {
 	public static final int torqueReductionActivationMode_e_TORQUE_REDUCTION_BUTTON = 0;
 	public static final int torqueReductionActivationMode_e_TORQUE_REDUCTION_CLUTCH_DOWN_SWITCH = 2;
 	public static final int torqueReductionActivationMode_e_TORQUE_REDUCTION_CLUTCH_UP_SWITCH = 3;
-	public static final int TOTAL_CONFIG_SIZE = 25892;
+	public static final int TOTAL_CONFIG_SIZE = 26336;
 	public static final int TPS_2_BYTE_PACKING_MULT = 100;
 	public static final int TPS_PPS_TOO_HIGH_THRESHOLD = 110;
 	public static final int TPS_PPS_TOO_LOW_THRESHOLD = -10;
@@ -1771,10 +1773,10 @@ public class VariableRegistryValues {
 	public static final int TS_RESPONSE_UNRECOGNIZED_COMMAND = 0x83;
 	public static final int TS_SCATTER_OFFSETS_COUNT = 128;
 	public static final char TS_SET_LOGGER_SWITCH = 'l';
-	public static final String TS_SIGNATURE = "rusEFI master.2026.04.18.mre-legacy_f4.3380985502";
+	public static final String TS_SIGNATURE = "rusEFI master.2026.04.26.mre-legacy_f4.3246073838";
 	public static final char TS_SIMULATE_CAN = '>';
 	public static final char TS_TEST_COMMAND = 't';
-	public static final int TS_TOTAL_OUTPUT_SIZE = 2124;
+	public static final int TS_TOTAL_OUTPUT_SIZE = 2128;
 	public static final String TS_TRIGGER_SCOPE_CHANNEL_1_NAME = "Channel 1";
 	public static final String TS_TRIGGER_SCOPE_CHANNEL_2_NAME = "Channel 2";
 	public static final int TS_TRIGGER_SCOPE_DISABLE = 5;

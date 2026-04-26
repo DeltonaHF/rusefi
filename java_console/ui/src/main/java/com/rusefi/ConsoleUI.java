@@ -18,7 +18,10 @@ import com.rusefi.ui.engine.EngineSnifferPanel;
 import com.rusefi.ui.lua.LuaScriptPanel;
 import com.rusefi.ui.util.JustOneInstance;
 import com.rusefi.ui.widgets.ConnectionStatusIcon;
+import com.rusefi.ui.wizard.WizardCatalog;
 import com.rusefi.ui.wizard.WizardContainer;
+import com.rusefi.ui.wizard.WizardStep;
+import com.rusefi.ui.wizard.WizardStepDescriptor;
 import com.rusefi.io.ConnectionStatusLogic;
 import com.rusefi.io.ConnectionStatusValue;
 import com.rusefi.core.ui.AutoupdateUtil;
@@ -62,7 +65,7 @@ public class ConsoleUI {
     private final TabbedPanel tabbedPane;
     private final String port;
 
-    public final UIContext uiContext = new UIContext();
+    public final UIContext uiContext;
 
     /**
      * We can listen to tab activation event if we so desire
@@ -70,6 +73,11 @@ public class ConsoleUI {
     private final Map<Component, ActionListener> tabSelectedListeners = new HashMap<>();
 
     public ConsoleUI(String port, SerialPortType serialPortType) {
+        this(new UIContext(), port, serialPortType, false);
+    }
+
+    public ConsoleUI(UIContext uiContext, String port, SerialPortType serialPortType, boolean alreadyConnected) {
+        this.uiContext = uiContext;
         LinkManager linkManager = uiContext.getLinkManager();
 
         CommandQueue.ERROR_HANDLER = e -> {
@@ -95,6 +103,29 @@ public class ConsoleUI {
 
         wizardContainer.setOnWizardExit(() -> rootCardLayout.show(rootPanel, "console"));
 
+        // On ECU connect, scan the wizard catalog for applicable standalone steps that need attention
+        // (e.g. empty VIN) and auto-launch the first one. Fires on every reconnect; once the user
+        // saves the value, subsequent connects skip this because needsAttention returns false.
+        ConnectionStatusLogic.INSTANCE.addListener(isConnected -> {
+            if (!isConnected) return;
+            SwingUtilities.invokeLater(() -> {
+                if (!ConnectionStatusLogic.INSTANCE.isConnected()) return;
+                if (uiContext.getBinaryProtocol() == null) return;
+                if (uiContext.getBinaryProtocol().getControllerConfiguration() == null) return;
+                // Don't stomp on an already-visible wizard
+                if (wizardContainer.isShowing()) return;
+
+                for (WizardStepDescriptor d : WizardCatalog.standaloneAutoLaunch()) {
+                    if (!d.applicable.test(uiContext)) continue;
+                    if (d.needsAttention == null || !d.needsAttention.test(uiContext)) continue;
+                    WizardStep step = d.factory.apply(uiContext);
+                    wizardContainer.startSingleStep(step);
+                    rootCardLayout.show(rootPanel, "wizard");
+                    return;
+                }
+            });
+        });
+
         JPanel cornerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
         cornerPanel.setOpaque(false);
         cornerPanel.add(connectionStatus);
@@ -113,8 +144,10 @@ public class ConsoleUI {
         getConfig().getRoot().setProperty(PORT_KEY, port);
         getConfig().getRoot().setProperty(SPEED_KEY, BaudRateHolder.INSTANCE.baudRate);
 
-        // todo: this blocking IO operation should NOT be happening on the UI thread
-        linkManager.start(port, mainFrame.listener);
+        if (!alreadyConnected) {
+            // todo: this blocking IO operation should NOT be happening on the UI thread
+            linkManager.start(port, mainFrame.listener);
+        }
 
         engineSnifferPanel = new EngineSnifferPanel(uiContext, getConfig().getRoot().getChild("digital_sniffer"));
         if (!LinkManager.isLogViewerMode(port))
@@ -159,10 +192,22 @@ console live data tab is broken #8402
 
             tabbedPane.addTab("Live Data", LiveDataPane.createLazy(uiContext).getContent());
  */
-            tabbedPane.addTab("Tuning", new TuningPane(uiContext).getContent());
+            TuningPane tuningPane = new TuningPane(uiContext);
+            PinoutPane pinoutPane = new PinoutPane(uiContext);
+            tabbedPane.addTab("Tuning", tuningPane.getContent());
             tabbedPane.addTab("Knock Analyzer", new KnockPane(uiContext).getContent());
-            tabbedPane.addTab("Pinout", new PinoutPane(uiContext).getContent());
+            tabbedPane.addTab("Pinout", pinoutPane.getContent());
             tabbedPane.addTab("Device", new DevicePane(uiContext, port, serialPortType, tabbedPane.tabbedPane).getContent());
+
+            // Pinout ↔ Tune bidirectional navigation
+            pinoutPane.setNavigateToTune((dialogKey, fieldKey) -> {
+                tabbedPane.selectTab("Tuning");
+                tuningPane.navigateToField(dialogKey, fieldKey);
+            });
+            tuningPane.setNavigateToPinout(enumValue -> {
+                tabbedPane.selectTab("Pinout");
+                pinoutPane.highlightByEnumValue(enumValue);
+            });
         }
 
         if (!linkManager.isLogViewer() && false) // todo: fix it & better name?
@@ -294,7 +339,7 @@ console live data tab is broken #8402
             } else {
                 for (String p : LinkManager.getCommPorts())
                     MessagesCentral.getInstance().postMessage(Launcher.class, "Available port: " + p);
-                StartupFrame startupFrame = new StartupFrame(ConnectivityContext.INSTANCE);
+                StartupFrame startupFrame = new StartupFrame(ConnectivityContext.INSTANCE, new UIContext());
                 if (bannerCallback != null)
                     bannerCallback.set(startupFrame::showUpdateBanner);
                 startupFrame.showUi();

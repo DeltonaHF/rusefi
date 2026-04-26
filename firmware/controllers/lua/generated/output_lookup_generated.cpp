@@ -991,6 +991,12 @@ float getOutputValueByHash(const int hash) {
 // m_knockFuelTrimMultiplier
 		case 95716118:
 			return engine->module<KnockController>()->m_knockFuelTrimMultiplier;
+// hasKnockRecently
+		case -96478755:
+			return engine->module<KnockController>()->hasKnockRecently;
+// hasKnockRetardNow
+		case 1438916461:
+			return engine->module<KnockController>()->hasKnockRetardNow;
 // m_isPriming
 		case -612624925:
 			return engine->module<PrimeController>()->m_isPriming;

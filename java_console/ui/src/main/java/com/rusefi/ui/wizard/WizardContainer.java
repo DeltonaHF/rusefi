@@ -20,16 +20,8 @@ import static com.devexperts.logging.Logging.getLogging;
 
 public class WizardContainer extends JPanel {
     private static final Logging log = getLogging(WizardContainer.class);
-    private static final int TOTAL_STEPS = 6;
-
-    private static final String[] WIZARD_FLAG_NAMES = {
-        "wizardNumberOfCylinders",
-        "wizardFiringOrder",
-        "wizardMapSensorType",
-        "wizardCrankTrigger",
-        "wizardCamTrigger",
-        "wizardInjectorFlow",
-    };
+    private static final List<WizardStepDescriptor> FLAGGED = WizardCatalog.flaggedSteps();
+    private static final int TOTAL_STEPS = FLAGGED.size();
 
     private final UIContext uiContext;
     private final JLabel stepLabel = new JLabel();
@@ -41,10 +33,21 @@ public class WizardContainer extends JPanel {
     private final JPanel debugPanel = new JPanel();
 
     private Runnable onWizardExit;
+    private Runnable onAllStepsComplete;
     private int currentStepIndex = 0;
+    private int totalSteps = TOTAL_STEPS;
     private int selectedCylinders = 4; // default, updated by step 0
 
     public WizardContainer(UIContext uiContext) {
+        this(uiContext, false);
+    }
+
+    /**
+     * @param compact when {@code true}, skips the oversized header fonts/buttons so the wizard
+     *                fits inside a modest host frame (e.g. the splash screen). Use {@code false}
+     *                for the fullscreen-console experience.
+     */
+    public WizardContainer(UIContext uiContext, boolean compact) {
         super(new BorderLayout());
         this.uiContext = uiContext;
 
@@ -52,11 +55,11 @@ public class WizardContainer extends JPanel {
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
-        scaleComponent(stepLabel, 1.5f);
+        if (!compact) scaleComponent(stepLabel, 1.5f);
         headerPanel.add(stepLabel, BorderLayout.CENTER);
 
         JButton cancelButton = new JButton("Exit Wizard");
-        scaleComponent(cancelButton, 1.5f);
+        if (!compact) scaleComponent(cancelButton, 1.5f);
         cancelButton.addActionListener(e -> exitWizard());
         headerPanel.add(cancelButton, BorderLayout.EAST);
 
@@ -66,6 +69,7 @@ public class WizardContainer extends JPanel {
 
         // Debug panel at the bottom showing wizard flag states
         buildDebugPanel();
+        debugPanel.setVisible(false);
         add(debugPanel, BorderLayout.SOUTH);
     }
 
@@ -80,7 +84,8 @@ public class WizardContainer extends JPanel {
         header.setFont(header.getFont().deriveFont(Font.BOLD));
         debugPanel.add(header);
 
-        for (String flag : WIZARD_FLAG_NAMES) {
+        for (WizardStepDescriptor d : FLAGGED) {
+            String flag = d.flagName;
             // Strip "wizard" prefix for a shorter display name
             String shortName = flag.startsWith("wizard") ? flag.substring(6) : flag;
             JLabel label = new JLabel(shortName + ": ?");
@@ -99,21 +104,18 @@ public class WizardContainer extends JPanel {
     }
 
     private void resetAllFlags() {
-        BinaryProtocol bp = uiContext.getBinaryProtocol();
-        if (bp == null) return;
-        IniFileModel ini = uiContext.iniFileState.getIniFileModel();
-        ConfigurationImage image = bp.getControllerConfiguration();
-        if (ini == null || image == null) return;
+        WizardConfig cfg = WizardConfig.snapshot(uiContext);
+        if (cfg == null) return;
 
-        ConfigurationImage modified = image.clone();
-        for (String flagName : WIZARD_FLAG_NAMES) {
-            IniField field = ini.getIniField(flagName);
+        ConfigurationImage modified = cfg.image.clone();
+        for (WizardStepDescriptor d : FLAGGED) {
+            IniField field = cfg.ini.findIniField(d.flagName).orElse(null);
             if (field instanceof EnumIniField) {
                 modified.setBitValue((EnumIniField) field, 0);
             }
         }
         uiContext.getLinkManager().submit(() -> {
-            bp.uploadChanges(modified);
+            cfg.bp.uploadChanges(modified);
             SwingUtilities.invokeLater(this::refreshDebugFlags);
         });
     }
@@ -123,10 +125,10 @@ public class WizardContainer extends JPanel {
         IniFileModel ini = (bp != null) ? uiContext.iniFileState.getIniFileModel() : null;
         ConfigurationImage image = (bp != null) ? bp.getControllerConfiguration() : null;
 
-        for (Map.Entry<String, JLabel> entry : debugLabels.entrySet()) {
-            String flagName = entry.getKey();
-            JLabel label = entry.getValue();
-            String shortName = flagName.startsWith("wizard") ? flagName.substring(6) : flagName;
+        for (WizardStepDescriptor d : FLAGGED) {
+            JLabel label = debugLabels.get(d.flagName);
+            if (label == null) continue;
+            String shortName = d.flagName.startsWith("wizard") ? d.flagName.substring(6) : d.flagName;
 
             if (ini == null || image == null) {
                 label.setText(shortName + ": --");
@@ -134,7 +136,19 @@ public class WizardContainer extends JPanel {
                 continue;
             }
 
-            IniField field = ini.getIniField(flagName);
+            if (!d.applicable.test(uiContext)) {
+                label.setText(shortName + ": N/A");
+                label.setForeground(Color.GRAY);
+                continue;
+            }
+
+            IniField field = ini.findIniField(d.flagName).orElse(null);
+            if (field == null) {
+                // Board's INI doesn't declare this wizard flag — render as unsupported.
+                label.setText(shortName + ": --");
+                label.setForeground(Color.GRAY);
+                continue;
+            }
             if (field instanceof EnumIniField) {
                 EnumIniField ef = (EnumIniField) field;
                 int raw = image.getByteBuffer(ef).getInt();
@@ -143,7 +157,7 @@ public class WizardContainer extends JPanel {
                 label.setText(shortName + ": " + (isSet ? "yes" : "no"));
                 label.setForeground(isSet ? new Color(0, 160, 0) : Color.RED);
             } else {
-                label.setText(shortName + ": N/A");
+                label.setText(shortName + ": ?");
                 label.setForeground(Color.GRAY);
             }
         }
@@ -155,6 +169,10 @@ public class WizardContainer extends JPanel {
 
     public void startWizard() {
         currentStepIndex = 0;
+        totalSteps = TOTAL_STEPS;
+        onAllStepsComplete = this::showCompletionCard;
+        // uncomment to show the debug panel; we need it to reset the flags on local env
+        // debugPanel.setVisible(true);
         steps.clear();
         stepContentPanel.removeAll();
 
@@ -215,7 +233,7 @@ public class WizardContainer extends JPanel {
         stepContentPanel.add(completionPanel, "complete");
 
         // If step 0 is already done, read cylindersCount from the ECU and create FiringOrderPanel now
-        if (isFlagSet(WIZARD_FLAG_NAMES[0])) {
+        if (isStepSatisfied(0)) {
             selectedCylinders = readCylindersCountFromEcu();
             createFiringOrderStep();
         }
@@ -225,25 +243,46 @@ public class WizardContainer extends JPanel {
         // Skip to the first incomplete step
         int firstIncomplete = findFirstIncompleteStep();
         if (firstIncomplete >= TOTAL_STEPS) {
-            stepLabel.setText("Configuration Complete");
-            CardLayout cl = (CardLayout) stepContentPanel.getLayout();
-            cl.show(stepContentPanel, "complete");
+            showCompletionCard();
         } else {
             showStep(firstIncomplete);
         }
     }
 
-    private int readCylindersCountFromEcu() {
-        BinaryProtocol bp = uiContext.getBinaryProtocol();
-        if (bp == null) return 4;
-        IniFileModel ini = uiContext.iniFileState.getIniFileModel();
-        ConfigurationImage image = bp.getControllerConfiguration();
-        if (ini == null || image == null) return 4;
+    /**
+     * Start the wizard with a single custom step. When the step completes (or is already
+     * satisfied), the wizard auto-exits. Used for targeted prompts like an empty-VIN auto-launch.
+     */
+    public void startSingleStep(WizardStep step) {
+        currentStepIndex = 0;
+        totalSteps = 1;
+        onAllStepsComplete = this::exitWizard;
+        debugPanel.setVisible(false);
+        steps.clear();
+        stepContentPanel.removeAll();
 
-        IniField field = ini.getIniField("cylindersCount");
+        wireStep(step, 0);
+        steps.add(step);
+        stepContentPanel.add(step.getPanel(), "step0");
+
+        refreshDebugFlags();
+        showStep(0);
+    }
+
+    private void showCompletionCard() {
+        stepLabel.setText("Configuration Complete");
+        CardLayout cl = (CardLayout) stepContentPanel.getLayout();
+        cl.show(stepContentPanel, "complete");
+    }
+
+    private int readCylindersCountFromEcu() {
+        WizardConfig cfg = WizardConfig.snapshot(uiContext);
+        if (cfg == null) return 4;
+
+        IniField field = cfg.ini.findIniField("cylindersCount").orElse(null);
         if (field == null) return 4;
 
-        String value = ConfigurationImageGetterSetter.getStringValue(field, image);
+        String value = ConfigurationImageGetterSetter.getStringValue(field, cfg.image);
         try {
             int count = (int) Double.parseDouble(value);
             return count > 0 ? count : 4;
@@ -254,24 +293,54 @@ public class WizardContainer extends JPanel {
 
     private int findFirstIncompleteStep() {
         for (int i = 0; i < TOTAL_STEPS; i++) {
-            if (!isFlagSet(WIZARD_FLAG_NAMES[i])) {
+            if (!isStepSatisfied(i)) {
                 return i;
             }
         }
         return TOTAL_STEPS;
     }
 
-    private boolean isFlagSet(String flagName) {
-        BinaryProtocol bp = uiContext.getBinaryProtocol();
-        if (bp == null) return false;
-        IniFileModel ini = uiContext.iniFileState.getIniFileModel();
-        ConfigurationImage image = bp.getControllerConfiguration();
-        if (ini == null || image == null) return false;
+    /** Total flagged steps applicable to this board — drives the "of N" denominator shown to the user. */
+    private int applicableFlaggedCount() {
+        int count = 0;
+        for (WizardStepDescriptor d : FLAGGED) {
+            if (d.applicable.test(uiContext)) count++;
+        }
+        return count;
+    }
 
-        IniField field = ini.getIniField(flagName);
+    /** 1-based position of flagged step {@code index} among applicable steps — drives the "Step N" numerator. */
+    private int applicableCountUpTo(int index) {
+        int count = 0;
+        for (int i = 0; i <= index && i < FLAGGED.size(); i++) {
+            if (FLAGGED.get(i).applicable.test(uiContext)) count++;
+        }
+        return count;
+    }
+
+    /**
+     * A flagged step is "satisfied" (skipped by the wizard flow) when:
+     * - it's not applicable to this board, OR
+     * - the board's INI does not declare the wizard flag (older firmware without the wizard bits), OR
+     * - the flag is already set to "yes".
+     */
+    private boolean isStepSatisfied(int stepIndex) {
+        if (stepIndex >= FLAGGED.size()) return true;
+        WizardStepDescriptor d = FLAGGED.get(stepIndex);
+        if (!d.applicable.test(uiContext)) return true;
+        IniFileModel ini = uiContext.iniFileState.getIniFileModel();
+        if (ini != null && !ini.findIniField(d.flagName).isPresent()) return true;
+        return isFlagSet(d.flagName);
+    }
+
+    private boolean isFlagSet(String flagName) {
+        WizardConfig cfg = WizardConfig.snapshot(uiContext);
+        if (cfg == null) return false;
+
+        IniField field = cfg.ini.findIniField(flagName).orElse(null);
         if (field instanceof EnumIniField) {
             EnumIniField ef = (EnumIniField) field;
-            int raw = image.getByteBuffer(ef).getInt();
+            int raw = cfg.image.getByteBuffer(ef).getInt();
             int ordinal = ConfigurationImage.getBitRange(raw, ef.getBitPosition(), ef.getBitSize0() + 1);
             return ordinal == 1;
         }
@@ -313,7 +382,7 @@ public class WizardContainer extends JPanel {
 
         // Set the actual config value if this step provides a single-field edit
         if (result.configFieldName != null && result.value != null) {
-            IniField configField = ini.getIniField(result.configFieldName);
+            IniField configField = ini.findIniField(result.configFieldName).orElse(null);
             if (configField != null) {
                 ConfigurationImageGetterSetter.setValue2(configField, modified, result.configFieldName, result.value);
                 log.info("Wizard: set " + result.configFieldName + " = " + result.value);
@@ -322,14 +391,16 @@ public class WizardContainer extends JPanel {
             }
         }
 
-        // Set the wizard progress flag to "yes" (ordinal 1)
+        // Set the wizard progress flag to "yes" (ordinal 1), if this step has one
         String flagName = step.getWizardFlagFieldName();
-        IniField flagField = ini.getIniField(flagName);
-        if (flagField instanceof EnumIniField) {
-            modified.setBitValue((EnumIniField) flagField, 1);
-            log.info("Wizard: set flag " + flagName + " = yes");
-        } else {
-            log.warn("Wizard: flag field not found or not enum: " + flagName);
+        if (flagName != null) {
+            IniField flagField = ini.findIniField(flagName).orElse(null);
+            if (flagField instanceof EnumIniField) {
+                modified.setBitValue((EnumIniField) flagField, 1);
+                log.info("Wizard: set flag " + flagName + " = yes");
+            } else {
+                log.warn("Wizard: flag field not found or not enum: " + flagName);
+            }
         }
 
         // Upload + burn on IO thread, advance step on EDT
@@ -343,19 +414,19 @@ public class WizardContainer extends JPanel {
     }
 
     private void advanceToNextStep() {
-        // Skip ahead past any steps whose flag is already set
+        // Skip ahead past satisfied steps (already-set flag or non-applicable to this board)
         int next = currentStepIndex + 1;
-        while (next < TOTAL_STEPS && isFlagSet(WIZARD_FLAG_NAMES[next])) {
-            log.info("Wizard: skipping already-completed step " + next + " (" + WIZARD_FLAG_NAMES[next] + ")");
+        while (next < totalSteps && next < FLAGGED.size() && isStepSatisfied(next)) {
+            log.info("Wizard: skipping satisfied step " + next + " (" + FLAGGED.get(next).flagName + ")");
             next++;
         }
 
-        if (next < TOTAL_STEPS) {
+        if (next < totalSteps) {
             showStep(next);
+        } else if (onAllStepsComplete != null) {
+            onAllStepsComplete.run();
         } else {
-            stepLabel.setText("Configuration Complete");
-            CardLayout cl = (CardLayout) stepContentPanel.getLayout();
-            cl.show(stepContentPanel, "complete");
+            showCompletionCard();
         }
     }
 
@@ -363,7 +434,11 @@ public class WizardContainer extends JPanel {
         currentStepIndex = index;
         WizardStep step = steps.get(index);
         String title = step != null ? step.getTitle() : "...";
-        stepLabel.setText("Step " + (index + 1) + " of " + TOTAL_STEPS + ": " + title);
+        if (totalSteps == 1) {
+            stepLabel.setText(title);
+        } else {
+            stepLabel.setText("Step " + applicableCountUpTo(index) + " of " + applicableFlaggedCount() + ": " + title);
+        }
         CardLayout cl = (CardLayout) stepContentPanel.getLayout();
         cl.show(stepContentPanel, "step" + index);
         if (step != null) {

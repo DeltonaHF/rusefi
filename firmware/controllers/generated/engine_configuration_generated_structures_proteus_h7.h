@@ -6159,6 +6159,16 @@ struct blend_table_s {
 };
 static_assert(sizeof(blend_table_s) == 188);
 
+// start of KnockGain
+struct KnockGain {
+	/**
+	 * units: dB
+	 * offset 0
+	 */
+	int8_t table[6][6] = {};
+};
+static_assert(sizeof(KnockGain) == 36);
+
 // start of persistent_config_s
 struct persistent_config_s {
 	/**
@@ -7693,8 +7703,21 @@ struct persistent_config_s {
 	/**
 	offset 30280 bit 31 */
 	bool unusedBit_286_31 : 1 {};
+	/**
+	 * offset 30284
+	 */
+	scaled_channel<uint8_t, 1, 10> knockGainLoadBins[6] = {};
+	/**
+	 * units: RPM
+	 * offset 30290
+	 */
+	scaled_channel<uint8_t, 1, 100> knockGainRpmBins[6] = {};
+	/**
+	 * offset 30296
+	 */
+	KnockGain knockGains[MAX_CYLINDER_COUNT] = {};
 };
-static_assert(sizeof(persistent_config_s) == 30284);
+static_assert(sizeof(persistent_config_s) == 30728);
 
 // end
 // this section was generated automatically by rusEFI tool config_definition-all.jar based on (unknown script) integration/rusefi_config.txt

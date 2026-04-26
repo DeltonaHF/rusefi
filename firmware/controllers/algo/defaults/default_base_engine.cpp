@@ -292,6 +292,8 @@ void setDefaultBaseEngine() {
 
   setRpmTableBin(config->maxKnockRetardRpmBins);
   setLinearCurve(config->maxKnockRetardLoadBins, 0, 100, 1);
+  setRpmTableBin(config->knockGainRpmBins);
+  setLinearCurve(config->knockGainLoadBins, 0, 100, 1);
   setTable(config->maxKnockRetardTable, 20);
 
 	// Trigger

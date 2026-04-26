@@ -84,11 +84,14 @@ UPDATE_CONSOLE_FOLDER_SOURCES = \
   $(BRANCH_REF_FILE) \
   $(TS_PLUGIN_LAUNCHER_JAR)
 
+# Launchers live at the bundle root; they delegate to console/rusefi_console.jar
+ROOT_FOLDER_SOURCES = \
+  ../misc/console_launcher/rusefi_updater.exe \
+  ../misc/console_launcher/rusefi_updater.sh
+
 # todo: remove BootCommander.exe once https://github.com/rusefi/rusefi/issues/6358 is done
 
 CONSOLE_FOLDER_SOURCES = \
-  ../misc/console_launcher/rusefi_console.exe \
-  ../misc/console_launcher/rusefi_console.sh \
   $(SIMULATOR_EXE)
 
 #  $(wildcard ../java_console/*.dll) \
@@ -123,9 +126,11 @@ ifeq ($(USE_OPENBLT),yes)
 else
   FIRMWARE_OUTPUTS = $(FOLDER)/$(PROJECT).hex
   BINSRC = $(BUILDDIR)/$(PROJECT).bin
+endif
+
+# we need these files for crash investigations
 ifeq ($(INCLUDE_ELF),yes)
   FIRMWARE_OUTPUTS += $(FOLDER)/$(PROJECT).elf $(FOLDER)/$(PROJECT).map $(FOLDER)/$(PROJECT).list
-endif
 endif
 
 ST_DRIVERS = $(DRIVERS_FOLDER)/silent_st_drivers2.exe
@@ -148,11 +153,13 @@ UPDATE_BUNDLE_FILES = \
   $(MOST_COMMON_BUNDLE_FILES)
 
 FOLDER_TARGETS = $(addprefix $(FOLDER)/,$(notdir $(FOLDER_SOURCES)))
+ROOT_FOLDER_TARGETS = $(addprefix $(FOLDER)/,$(notdir $(ROOT_FOLDER_SOURCES)))
 CONSOLE_FOLDER_TARGETS = $(addprefix $(CONSOLE_FOLDER)/,$(notdir $(CONSOLE_FOLDER_SOURCES)))
 
 FULL_BUNDLE_CONTENT = \
   $(ST_DRIVERS) \
   $(FOLDER_TARGETS) \
+  $(ROOT_FOLDER_TARGETS) \
   $(CONSOLE_FOLDER_TARGETS)
 
 BUNDLE_FILES = \
@@ -285,7 +292,7 @@ CLEAN_BUNDLE_HOOK:
 PERCENT = %
 
 .SECONDEXPANSION:
-$(FOLDER_TARGETS) $(UPDATE_FOLDER_TARGETS): $(FOLDER)/%: $$(filter $$(PERCENT)$$*,$(FOLDER_SOURCES) $(UPDATE_FOLDER_SOURCES)) | $(FOLDER)
+$(FOLDER_TARGETS) $(UPDATE_FOLDER_TARGETS) $(ROOT_FOLDER_TARGETS): $(FOLDER)/%: $$(filter $$(PERCENT)$$*,$(FOLDER_SOURCES) $(UPDATE_FOLDER_SOURCES) $(ROOT_FOLDER_SOURCES)) | $(FOLDER)
 	ln -rfs $< $@
 
 $(CONSOLE_FOLDER_TARGETS) $(UPDATE_CONSOLE_FOLDER_TARGETS): $(CONSOLE_FOLDER)/%: $$(filter $$(PERCENT)$$*,$(CONSOLE_FOLDER_SOURCES) $(UPDATE_CONSOLE_FOLDER_SOURCES)) | $(CONSOLE_FOLDER)
