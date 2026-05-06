@@ -436,7 +436,7 @@ public class VariableRegistryValues {
 	public static final int ego_sensor_e_ES_PLX = 4;
 	public static final String egoSettings_NAME = "CAN O2 sensors";
 	public static final int EGT_CHANNEL_COUNT = 8;
-	public static final int engine_configuration_s_size = 4096;
+	public static final int engine_configuration_s_size = 4384;
 	public static final int engine_load_mode_e_LM_ALPHA_N = 2;
 	public static final int engine_load_mode_e_LM_LUA = 3;
 	public static final int engine_load_mode_e_LM_REAL_MAF = 1;
@@ -1312,9 +1312,9 @@ public class VariableRegistryValues {
 	public static final int lua_gauge_meaning_e_LUA_GAUGE_LOWER_BOUND = 0;
 	public static final int lua_gauge_meaning_e_LUA_GAUGE_UPPER_BOUND = 1;
 	public static final int LUA_PWM_COUNT = 8;
-	public static final int LUA_SCRIPT_SIZE = 10000;
+	public static final int LUA_SCRIPT_SIZE = 8000;
 	public static final int MAF_DECODING_COUNT = 32;
-	public static final String MAIN_HELP_URL = "https://rusefi.com/s/microrusefi";
+	public static final String MAIN_HELP_URL = "http://www.rusefi.com/";
 	public static final String MAIN_PAGE_GAUGES_FILE = "tunerstudio/main_page_gauges.ini";
 	public static final int MAP_ANGLE_SIZE = 8;
 	public static final int MAP_EST_LOAD_COUNT = 16;
@@ -1345,8 +1345,10 @@ public class VariableRegistryValues {
 	public static final int MsIoBoxVss_VR12 = 1;
 	public static final int nitrous_arming_method_e_DIGITAL_SWITCH_INPUT = 0;
 	public static final int nitrous_arming_method_e_LUA_GAUGE = 1;
+	public static final int operation_mode_e_FOUR_STROKE_43_TIMES_CRANK_SENSOR = 9;
 	public static final int operation_mode_e_FOUR_STROKE_CAM_SENSOR = 2;
 	public static final int operation_mode_e_FOUR_STROKE_CRANK_SENSOR = 1;
+	public static final int operation_mode_e_FOUR_STROKE_FOUR_TIMES_CRANK_SENSOR = 8;
 	public static final int operation_mode_e_FOUR_STROKE_SIX_TIMES_CRANK_SENSOR = 7;
 	public static final int operation_mode_e_FOUR_STROKE_SYMMETRICAL_CRANK_SENSOR = 4;
 	public static final int operation_mode_e_FOUR_STROKE_THREE_TIMES_CRANK_SENSOR = 5;
@@ -1378,7 +1380,7 @@ public class VariableRegistryValues {
 	public static final int PEDAL_TO_TPS_SIZE = 8;
 	public static final String pedalSensor_NAME = "Accelerator pedal";
 	public static final String pedalToTpsTbl_NAME = "ETB pedal target";
-	public static final int persistent_config_s_size = 26336;
+	public static final int persistent_config_s_size = 24624;
 	public static final int pid_s_size = 20;
 	public static final int pin_input_mode_e_PI_DEFAULT = 0;
 	public static final int pin_input_mode_e_PI_INVERTED_DEFAULT = 4;
@@ -1499,7 +1501,7 @@ public class VariableRegistryValues {
 	public static final int TCU_SOLENOID_COUNT = 6;
 	public static final int TCU_TABLE_WIDTH = 8;
 	public static final int thermistor_conf_s_size = 28;
-	public static final int ThermistorConf_size = 32;
+	public static final int ThermistorConf_size = 36;
 	public static final int THR_EST_SIZE = 12;
 	public static final int timing_mode_e_TM_DYNAMIC = 0;
 	public static final int timing_mode_e_TM_FIXED = 1;
@@ -1522,7 +1524,7 @@ public class VariableRegistryValues {
 	public static final int torqueReductionActivationMode_e_TORQUE_REDUCTION_BUTTON = 0;
 	public static final int torqueReductionActivationMode_e_TORQUE_REDUCTION_CLUTCH_DOWN_SWITCH = 2;
 	public static final int torqueReductionActivationMode_e_TORQUE_REDUCTION_CLUTCH_UP_SWITCH = 3;
-	public static final int TOTAL_CONFIG_SIZE = 26336;
+	public static final int TOTAL_CONFIG_SIZE = 24624;
 	public static final int TPS_2_BYTE_PACKING_MULT = 100;
 	public static final int TPS_PPS_TOO_HIGH_THRESHOLD = 110;
 	public static final int TPS_PPS_TOO_LOW_THRESHOLD = -10;
@@ -1551,6 +1553,7 @@ public class VariableRegistryValues {
 	public static final String TRIGGER_ONLY_PRIMARY = "useOnlyPrimaryForSync";
 	public static final int TRIGGER_SIMULATOR_PIN_COUNT = 2;
 	public static final String TRIGGER_SYNC_EDGE = "syncEdge";
+	public static final int trigger_type_e_TT_129DIV3PLUS1_CRANK = 100;
 	public static final int trigger_type_e_TT_12_TOOTH_CRANK = 38;
 	public static final int trigger_type_e_TT_2JZ_3_34_SIMULATION_ONLY = 25;
 	public static final int trigger_type_e_TT_36_2_1 = 70;
@@ -1558,6 +1561,7 @@ public class VariableRegistryValues {
 	public static final int trigger_type_e_TT_36_2_2_2 = 23;
 	public static final int trigger_type_e_TT_3_1_CAM = 31;
 	public static final int trigger_type_e_TT_3_TOOTH_CRANK = 72;
+	public static final int trigger_type_e_TT_43_CRANK = 99;
 	public static final int trigger_type_e_TT_60_2_2_F3R = 75;
 	public static final int trigger_type_e_TT_60_2_WRONG_POLARITY = 20;
 	public static final int trigger_type_e_TT_60DEG_TOOTH = 77;
@@ -1571,6 +1575,7 @@ public class VariableRegistryValues {
 	public static final int trigger_type_e_TT_DAIHATSU_3_CYL = 6;
 	public static final int trigger_type_e_TT_DAIHATSU_4_CYL = 81;
 	public static final int trigger_type_e_TT_DEV = 83;
+	public static final int trigger_type_e_TT_DIGIPLEX_4_PLUS_1_CRANK = 98;
 	public static final int trigger_type_e_TT_DODGE_NEON_1995 = 2;
 	public static final int trigger_type_e_TT_DODGE_NEON_2003_CAM = 14;
 	public static final int trigger_type_e_TT_DODGE_NEON_2003_CRANK = 32;
@@ -1590,6 +1595,7 @@ public class VariableRegistryValues {
 	public static final int trigger_type_e_TT_HONDA_J30A2_24_1_1 = 87;
 	public static final int trigger_type_e_TT_HONDA_K_CAM_4_1 = 67;
 	public static final int trigger_type_e_TT_HONDA_K_CRANK_12_1 = 46;
+	public static final int trigger_type_e_TT_IAW_4_PLUS_2_CRANK = 97;
 	public static final int trigger_type_e_TT_JEEP_18_2_2_2 = 37;
 	public static final int trigger_type_e_TT_JEEP_4_CYL = 40;
 	public static final int trigger_type_e_TT_JEEP_EVD_36_2_2 = 92;
@@ -1634,7 +1640,7 @@ public class VariableRegistryValues {
 	public static final int trigger_type_e_TT_TOOTHED_WHEEL_60_2 = 8;
 	public static final int trigger_type_e_TT_TOYOTA_3_TOOTH_UZ = 91;
 	public static final int trigger_type_e_TT_TRI_TACH = 53;
-	public static final int trigger_type_e_TT_UNUSED = 97;
+	public static final int trigger_type_e_TT_UNUSED = 101;
 	public static final int trigger_type_e_TT_UNUSED_96 = 96;
 	public static final int trigger_type_e_TT_VVT_BARRA_3_PLUS_1 = 56;
 	public static final int trigger_type_e_TT_VVT_BOSCH_QUICK_START = 47;
@@ -1773,7 +1779,7 @@ public class VariableRegistryValues {
 	public static final int TS_RESPONSE_UNRECOGNIZED_COMMAND = 0x83;
 	public static final int TS_SCATTER_OFFSETS_COUNT = 128;
 	public static final char TS_SET_LOGGER_SWITCH = 'l';
-	public static final String TS_SIGNATURE = "rusEFI master.2026.04.26.mre-legacy_f4.3246073838";
+	public static final String TS_SIGNATURE = "rusEFI deltona-dev.2026.04.29.RP-f405-board.2691026164";
 	public static final char TS_SIMULATE_CAN = '>';
 	public static final char TS_TEST_COMMAND = 't';
 	public static final int TS_TOTAL_OUTPUT_SIZE = 2128;
@@ -1827,6 +1833,8 @@ public class VariableRegistryValues {
 	public static final String VE_TABLE_NAME = "VE Table";
 	public static final int VEHICLE_INFO_SIZE = 32;
 	public static final int VIN_NUMBER_SIZE = 17;
+	public static final int voltage_table_conf_s_size = 128;
+	public static final int VOLTAGE_TABLE_SIZE = 16;
 	public static final int VR_THRESHOLD_COUNT = 2;
 	public static final int vr_threshold_s_size = 16;
 	public static final int VSS_FILTER_MAX = 200;
@@ -1851,6 +1859,7 @@ public class VariableRegistryValues {
 	public static final int vvt_mode_e_VVT_HONDA_K_EXHAUST = 16;
 	public static final int vvt_mode_e_VVT_HONDA_K_INTAKE = 10;
 	public static final int vvt_mode_e_VVT_HR12DDR_IN = 24;
+	public static final int vvt_mode_e_VVT_IAW_4_PLUS_2_CAM = 31;
 	public static final int vvt_mode_e_VVT_INACTIVE = 0;
 	public static final int vvt_mode_e_VVT_MAP_V_TWIN = 13;
 	public static final int vvt_mode_e_VVT_MAZDA_L = 22;

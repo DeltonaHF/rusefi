@@ -2,8 +2,11 @@
 # live in this directory, not the shared f407-discovery tree.
 HALCONFDIR = $(BOARD_DIR)
 
-BOARDCPPSRC = $(BOARD_DIR)/board_configuration.cpp \
-              $(BOARD_DIR)/ntc_table_sensors.cpp 
+BOARDCPPSRC = $(BOARD_DIR)/board_configuration.cpp 
+#              $(BOARD_DIR)/ntc_table_sensors.cpp 
+
+#BOARDCPPSRC = $(BOARD_DIR)/board_configuration.cpp \
+#              $(BOARD_DIR)/ntc_table_sensors.cpp 
 
 # board.c supplies __early_init() and the SDC card-detect / write-protect
 # callbacks (sdc_lld_is_card_inserted / sdc_lld_is_write_protected).

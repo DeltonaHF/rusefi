@@ -235,6 +235,9 @@ float getConfigValueByHash(const int hash) {
 // clt.config.bias_resistor
 		case -653172717:
 			return engineConfiguration->clt.config.bias_resistor;
+// clt.useVoltageTable
+		case -1518469539:
+			return engineConfiguration->clt.useVoltageTable;
 // iat.config.tempC_1
 		case -672272162:
 			return engineConfiguration->iat.config.tempC_1;
@@ -256,6 +259,9 @@ float getConfigValueByHash(const int hash) {
 // iat.config.bias_resistor
 		case 406607630:
 			return engineConfiguration->iat.config.bias_resistor;
+// iat.useVoltageTable
+		case -1884754824:
+			return engineConfiguration->iat.useVoltageTable;
 // launchTimingRetard
 		case 1226423210:
 			return engineConfiguration->launchTimingRetard;
@@ -1351,6 +1357,9 @@ float getConfigValueByHash(const int hash) {
 // auxTempSensor1.config.bias_resistor
 		case -1189603841:
 			return engineConfiguration->auxTempSensor1.config.bias_resistor;
+// auxTempSensor1.useVoltageTable
+		case 1020547273:
+			return engineConfiguration->auxTempSensor1.useVoltageTable;
 // auxTempSensor2.config.tempC_1
 		case -900025104:
 			return engineConfiguration->auxTempSensor2.config.tempC_1;
@@ -1372,6 +1381,9 @@ float getConfigValueByHash(const int hash) {
 // auxTempSensor2.config.bias_resistor
 		case 734290080:
 			return engineConfiguration->auxTempSensor2.config.bias_resistor;
+// auxTempSensor2.useVoltageTable
+		case -810667318:
+			return engineConfiguration->auxTempSensor2.useVoltageTable;
 // knockSamplingDuration
 		case -430252676:
 			return engineConfiguration->knockSamplingDuration;
@@ -1762,6 +1774,9 @@ float getConfigValueByHash(const int hash) {
 // oilTempSensor.config.bias_resistor
 		case -346622972:
 			return engineConfiguration->oilTempSensor.config.bias_resistor;
+// oilTempSensor.useVoltageTable
+		case -2141579346:
+			return engineConfiguration->oilTempSensor.useVoltageTable;
 // fuelTempSensor.config.tempC_1
 		case -713764196:
 			return engineConfiguration->fuelTempSensor.config.tempC_1;
@@ -1783,6 +1798,9 @@ float getConfigValueByHash(const int hash) {
 // fuelTempSensor.config.bias_resistor
 		case -1285484724:
 			return engineConfiguration->fuelTempSensor.config.bias_resistor;
+// fuelTempSensor.useVoltageTable
+		case 1040975350:
+			return engineConfiguration->fuelTempSensor.useVoltageTable;
 // ambientTempSensor.config.tempC_1
 		case 275986512:
 			return engineConfiguration->ambientTempSensor.config.tempC_1;
@@ -1804,6 +1822,9 @@ float getConfigValueByHash(const int hash) {
 // ambientTempSensor.config.bias_resistor
 		case -1899369472:
 			return engineConfiguration->ambientTempSensor.config.bias_resistor;
+// ambientTempSensor.useVoltageTable
+		case -656989654:
+			return engineConfiguration->ambientTempSensor.useVoltageTable;
 // compressorDischargeTemperature.config.tempC_1
 		case -498450107:
 			return engineConfiguration->compressorDischargeTemperature.config.tempC_1;
@@ -1825,6 +1846,9 @@ float getConfigValueByHash(const int hash) {
 // compressorDischargeTemperature.config.bias_resistor
 		case -1555883851:
 			return engineConfiguration->compressorDischargeTemperature.config.bias_resistor;
+// compressorDischargeTemperature.useVoltageTable
+		case -443594305:
+			return engineConfiguration->compressorDischargeTemperature.useVoltageTable;
 // speedometerPulsePerKm
 		case 1007396714:
 			return engineConfiguration->speedometerPulsePerKm;
@@ -2526,6 +2550,11 @@ bool setConfigValueByName(const char *name, float value) {
 		engineConfiguration->clt.config.bias_resistor = value;
 		return 1;
 	}
+		case -1518469539:
+	{
+		engineConfiguration->clt.useVoltageTable = (int)value;
+		return 1;
+	}
 		case -672272162:
 	{
 		engineConfiguration->iat.config.tempC_1 = value;
@@ -2559,6 +2588,11 @@ bool setConfigValueByName(const char *name, float value) {
 		case 406607630:
 	{
 		engineConfiguration->iat.config.bias_resistor = value;
+		return 1;
+	}
+		case -1884754824:
+	{
+		engineConfiguration->iat.useVoltageTable = (int)value;
 		return 1;
 	}
 		case 1226423210:
@@ -4386,6 +4420,11 @@ bool setConfigValueByName(const char *name, float value) {
 		engineConfiguration->auxTempSensor1.config.bias_resistor = value;
 		return 1;
 	}
+		case 1020547273:
+	{
+		engineConfiguration->auxTempSensor1.useVoltageTable = (int)value;
+		return 1;
+	}
 		case -900025104:
 	{
 		engineConfiguration->auxTempSensor2.config.tempC_1 = value;
@@ -4419,6 +4458,11 @@ bool setConfigValueByName(const char *name, float value) {
 		case 734290080:
 	{
 		engineConfiguration->auxTempSensor2.config.bias_resistor = value;
+		return 1;
+	}
+		case -810667318:
+	{
+		engineConfiguration->auxTempSensor2.useVoltageTable = (int)value;
 		return 1;
 	}
 		case -430252676:
@@ -5071,6 +5115,11 @@ bool setConfigValueByName(const char *name, float value) {
 		engineConfiguration->oilTempSensor.config.bias_resistor = value;
 		return 1;
 	}
+		case -2141579346:
+	{
+		engineConfiguration->oilTempSensor.useVoltageTable = (int)value;
+		return 1;
+	}
 		case -713764196:
 	{
 		engineConfiguration->fuelTempSensor.config.tempC_1 = value;
@@ -5104,6 +5153,11 @@ bool setConfigValueByName(const char *name, float value) {
 		case -1285484724:
 	{
 		engineConfiguration->fuelTempSensor.config.bias_resistor = value;
+		return 1;
+	}
+		case 1040975350:
+	{
+		engineConfiguration->fuelTempSensor.useVoltageTable = (int)value;
 		return 1;
 	}
 		case 275986512:
@@ -5141,6 +5195,11 @@ bool setConfigValueByName(const char *name, float value) {
 		engineConfiguration->ambientTempSensor.config.bias_resistor = value;
 		return 1;
 	}
+		case -656989654:
+	{
+		engineConfiguration->ambientTempSensor.useVoltageTable = (int)value;
+		return 1;
+	}
 		case -498450107:
 	{
 		engineConfiguration->compressorDischargeTemperature.config.tempC_1 = value;
@@ -5174,6 +5233,11 @@ bool setConfigValueByName(const char *name, float value) {
 		case -1555883851:
 	{
 		engineConfiguration->compressorDischargeTemperature.config.bias_resistor = value;
+		return 1;
+	}
+		case -443594305:
+	{
+		engineConfiguration->compressorDischargeTemperature.useVoltageTable = (int)value;
 		return 1;
 	}
 		case 1007396714:

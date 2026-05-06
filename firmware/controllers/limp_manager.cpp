@@ -13,7 +13,7 @@ static bool noFiringUntilVvtSync() {
 	auto operationMode = getEngineRotationState()->getOperationMode();
 
 	if (engineConfiguration->isPhaseSyncRequiredForIgnition) {
-	  warningTsReport(ObdCode::CUSTOM_NEED_PHASE, "Phase sync required per Setting");
+//	  warningTsReport(ObdCode::CUSTOM_NEED_PHASE, "Phase sync required per Setting");
 		// in rare cases engines do not like random sequential mode
 		return true;
 	}

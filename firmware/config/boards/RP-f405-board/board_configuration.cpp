@@ -205,8 +205,8 @@ static void rp_f405_boardDefaultConfiguration() {
     // Declared in ntc_table_sensors.cpp; replaces the standard Steinhart-Hart chain
     // because the OEM pull-up network distorts the thermistor curve beyond what
     // ResistanceFunc can fit accurately.
-    void initRpBoardNtcSensors();
-    initRpBoardNtcSensors();
+//    void initRpBoardNtcSensors();
+//    initRpBoardNtcSensors();
 }
 
 void setup_custom_board_overrides() {

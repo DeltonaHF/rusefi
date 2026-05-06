@@ -495,11 +495,32 @@ static void setDefaultEngineConfiguration() {
 
     setCommonNTCSensorParameters(&engineConfiguration->iat);
 
+// Default voltage/temperature table for CLT (sensible NTC-like defaults, 0-5V range)
+    // Users should calibrate these to their actual sensor+circuit response
+    static const float defaultVolts[VOLTAGE_TABLE_SIZE] = {
+        0.20f, 0.40f, 0.60f, 0.80f, 1.00f, 1.30f, 1.60f, 1.90f,
+        2.20f, 2.60f, 3.00f, 3.40f, 3.70f, 4.00f, 4.30f, 4.70f
+    };
+    static const float defaultCltTemps[VOLTAGE_TABLE_SIZE] = {
+        120, 110, 100,  90,  80,  70,  60,  50,
+         40,  30,  20,  10,   0, -10, -20, -30
+    };
+    static const float defaultIatTemps[VOLTAGE_TABLE_SIZE] = {
+        100,  90,  80,  70,  60,  50,  40,  30,
+         20,  10,   0, -10, -20, -30, -40, -50
+    };
+    for (int i = 0; i < VOLTAGE_TABLE_SIZE; i++) {
+        engineConfiguration->cltVoltageTable.voltageTable[i] = defaultVolts[i];
+        engineConfiguration->cltVoltageTable.tempCTable[i] = defaultCltTemps[i];
+        engineConfiguration->iatVoltageTable.voltageTable[i] = defaultVolts[i];
+        engineConfiguration->iatVoltageTable.tempCTable[i] = defaultIatTemps[i];
+    }
+
 	// wow unit tests have much cooler setDefaultLaunchParameters method
 	engineConfiguration->launchRpm = 3000;
 // 	engineConfiguration->launchTimingRetard = 10;
 	engineConfiguration->launchRpmWindow = 500;
-    engineConfiguration->launchSpeedThreshold = 30;
+	engineConfiguration->launchSpeedThreshold = 30;
 
 	engineConfiguration->engineSnifferRpmThreshold = 2500;
 

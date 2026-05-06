@@ -229,6 +229,9 @@ kPa/psi value at high volts
 ### clt.config.bias_resistor
 Pull-up resistor value on your board
 
+### clt.useVoltageTable
+Use 16-point voltage/temperature table instead of Steinhart-Hart
+
 ### iat.config.tempC_1
 
 
@@ -249,6 +252,9 @@ Pull-up resistor value on your board
 
 ### iat.config.bias_resistor
 Pull-up resistor value on your board
+
+### iat.useVoltageTable
+Use 16-point voltage/temperature table instead of Steinhart-Hart
 
 ### launchTimingRetard
 
@@ -1345,6 +1351,9 @@ This is the pressure at which your injector flow is known.\nFor example if your 
 ### auxTempSensor1.config.bias_resistor
 Pull-up resistor value on your board
 
+### auxTempSensor1.useVoltageTable
+Use 16-point voltage/temperature table instead of Steinhart-Hart
+
 ### auxTempSensor2.config.tempC_1
 
 
@@ -1365,6 +1374,9 @@ Pull-up resistor value on your board
 
 ### auxTempSensor2.config.bias_resistor
 Pull-up resistor value on your board
+
+### auxTempSensor2.useVoltageTable
+Use 16-point voltage/temperature table instead of Steinhart-Hart
 
 ### knockSamplingDuration
 
@@ -1756,6 +1768,9 @@ Scale the reported vehicle speed value from CAN. Example: Parameter set to 1.1, 
 ### oilTempSensor.config.bias_resistor
 Pull-up resistor value on your board
 
+### oilTempSensor.useVoltageTable
+Use 16-point voltage/temperature table instead of Steinhart-Hart
+
 ### fuelTempSensor.config.tempC_1
 
 
@@ -1776,6 +1791,9 @@ Pull-up resistor value on your board
 
 ### fuelTempSensor.config.bias_resistor
 Pull-up resistor value on your board
+
+### fuelTempSensor.useVoltageTable
+Use 16-point voltage/temperature table instead of Steinhart-Hart
 
 ### ambientTempSensor.config.tempC_1
 
@@ -1798,6 +1816,9 @@ Pull-up resistor value on your board
 ### ambientTempSensor.config.bias_resistor
 Pull-up resistor value on your board
 
+### ambientTempSensor.useVoltageTable
+Use 16-point voltage/temperature table instead of Steinhart-Hart
+
 ### compressorDischargeTemperature.config.tempC_1
 
 
@@ -1818,6 +1839,9 @@ Pull-up resistor value on your board
 
 ### compressorDischargeTemperature.config.bias_resistor
 Pull-up resistor value on your board
+
+### compressorDischargeTemperature.useVoltageTable
+Use 16-point voltage/temperature table instead of Steinhart-Hart
 
 ### speedometerPulsePerKm
 Number of speedometer pulses per kilometer travelled.
