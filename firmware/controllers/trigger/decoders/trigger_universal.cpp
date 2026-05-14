@@ -163,11 +163,12 @@ static void commonSymmetrical(TriggerWaveform* s, int count, float gapFrom, floa
 		s->setTriggerSynchronizationGap3(i, gapFrom, gapTo);
 	}
 
-    float width = 360 / count;
+  double width = 360.0d / (double)count;
 
 	// Just a single tooth with 50% duty cycle
 	s->addEventAngle(width / 2, TriggerValue::FALL, TriggerWheel::T_PRIMARY);
 	s->addEventAngle(width, TriggerValue::RISE, TriggerWheel::T_PRIMARY);
+
 }
 
 // Useful for:
@@ -197,7 +198,7 @@ void configure4ToothCrank(TriggerWaveform* s) {
     
     // commonSymmetrical creates a single tooth definition that is repeated 'count' times.
     // This ensures synchronizationCounter increments on EVERY crank tooth.
-    commonSymmetrical(s, 4, 0.5f, 1.5f);
+    commonSymmetrical(s, 4, 0.25f, 2.5f);
 }
 
 void configure6ToothCrank(TriggerWaveform* s) {

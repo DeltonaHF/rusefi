@@ -39,6 +39,7 @@
 #include "trigger_universal.h"
 #include "trigger_mercedes.h"
 #include "trigger_generalized.h"
+#include "trigger_iaw.h"
 #include "engine_state.h"
 
 void wrapAngle(angle_t& angle, const char* msg, ObdCode code) {
@@ -858,7 +859,8 @@ void TriggerWaveform::initializeTriggerWaveform(operation_mode_e triggerOperatio
 		break;
 
 	case trigger_type_e::TT_IAW_4_PLUS_2_CRANK:
-		configure4ToothCrank(this);
+		//configure4ToothCrank(this);
+		configureIaw4Plus2Crank(this);
 		break;
 
 	case trigger_type_e::TT_DIGIPLEX_4_PLUS_1_CRANK:
