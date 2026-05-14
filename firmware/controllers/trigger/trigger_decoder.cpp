@@ -84,6 +84,9 @@ void TriggerDecoderBase::resetState() {
 
 	totalEventCountBase = 0;
 	isFirstEvent = true;
+
+	combinedShiftReg = 0;
+	combinedBitsCollected = 0;
 }
 
 void TriggerDecoderBase::setTriggerErrorState(int errorIncrement) {
@@ -190,9 +193,15 @@ int TriggerDecoderBase::getSynchronizationCounter() const {
 }
 
 void PrimaryTriggerDecoder::resetState() {
-	TriggerDecoderBase::resetState();
+    TriggerDecoderBase::resetState();
 
-	resetHasFullSync();
+    // Re-arm sync suppression only if a combined pattern is in use.
+    // For normal triggers, m_combinedPatternReady stays true (default).
+    if (getTriggerCentral()->combinedPattern != nullptr) {
+      setCombinedPatternReady(false);
+    }
+
+    resetHasFullSync();
 }
 
 
@@ -244,7 +253,12 @@ angle_t PrimaryTriggerDecoder::syncEnginePhase(int divider, int remainder, angle
 		// Resync angle changed - count how many times this happens
 		camResyncCounter++;
 		onTransitionEvent(TransitionEvent::EngineResync);
-	}
+#if ! EFI_PROD_CODE
+    if(printTriggerTrace) { 
+		  efiPrintf("syncEnginePhase: totalShift=%d; camResyncCounter=%d", (int)totalShift, (int)camResyncCounter);
+	  }
+#endif /* EFI_PROD_CODE */
+  }
 
 	return totalShift;
 }
@@ -252,6 +266,7 @@ angle_t PrimaryTriggerDecoder::syncEnginePhase(int divider, int remainder, angle
 void TriggerDecoderBase::incrementShaftSynchronizationCounter() {
 	synchronizationCounter++;
 }
+
 
 void PrimaryTriggerDecoder::onTriggerError() {
 	// On trigger error, we've lost full sync
@@ -408,12 +423,13 @@ void TriggerDecoderBase::printGaps(const char * prefix,
 
 						bool gapOk = isInRange(ratioFrom, gap, ratioTo);
 
-						efiPrintf("%s %srpm=%d time=%d eventIndex=%lu gapIndex=%d: %s gap=%.3f expected from %.3f to %.3f error=%s",
+						efiPrintf("%s %srpm=%d time=%d eventIndex=%lu syncCnt=%d gapIndex=%d: %s gap=%.3f expected from %.3f to %.3f error=%s",
 								prefix,
 								triggerConfiguration.PrintPrefix,
 								(int)Sensor::getOrZero(SensorType::Rpm),
 							/* cast is needed to make sure we do not put 64 bit value to stack*/ (int)getTimeNowS(),
 							currentCycle.current_index,
+							(int)synchronizationCounter,
 							i,
 							gapOk ? "Y" : "n",
 							gap,
@@ -521,10 +537,18 @@ expected<TriggerDecodeResult> TriggerDecoderBase::decodeTriggerEvent(
 			    setTriggerErrorState(100);
 			}
 
-			isSynchronizationPoint = isSyncPoint(triggerShape, triggerConfiguration.TriggerType.type);
+			isSynchronizationPoint = allowSynchronization() &&  isSyncPoint(triggerShape, triggerConfiguration.TriggerType.type);
 			if (isSynchronizationPoint) {
 				enginePins.debugTriggerSync.toggle();
 			}
+
+#if ! EFI_PROD_CODE
+      if(printTriggerTrace) {
+        efiPrintf("decodeTriggerEvent SyncTypeWheel index=%d isSyncPoint=%d",
+					(int)currentCycle.current_index,
+					(int)isSynchronizationPoint);
+      }
+#endif /* EFI_PROD_CODE */
 
 			/**
 			 * todo: technically we can afford detailed logging even with 60/2 as long as low RPM
@@ -564,7 +588,16 @@ expected<TriggerDecodeResult> TriggerDecoderBase::decodeTriggerEvent(
 
 			unsigned int endOfCycleIndex = triggerShape.getSize() - (useOnlyRisingEdgeForTrigger ? 2 : 1);
 
-			isSynchronizationPoint = !getShaftSynchronized() || (currentCycle.current_index >= endOfCycleIndex);
+			isSynchronizationPoint = allowSynchronization() && (!getShaftSynchronized() || (currentCycle.current_index >= endOfCycleIndex));
+			
+#if ! EFI_PROD_CODE
+      if(printTriggerTrace) {
+        efiPrintf("decodeTriggerEvent noSyncTypeWheel index=%d endOfCycleIndex=%d isSyncPoint=%d",
+					(int)currentCycle.current_index,
+					(int)endOfCycleIndex,
+					(int)isSynchronizationPoint);
+      }
+#endif /* EFI_PROD_CODE */
 
 #if EFI_UNIT_TEST
 			if (printTriggerTrace) {

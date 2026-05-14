@@ -148,9 +148,11 @@ angle_t TriggerCentral::syncEnginePhaseAndReport(int divider, int remainder) {
 		instantRpm.resetInstantRpm();
 
 //DEBUG ("SyncEnginePhase: divider=%d remainder=%d totalShift=%f", divider, remainder, totalShift);
-    efiPrintf("trigger_central.cpp: SyncEnginePhase: divider=%d remainder=%d totalShift=%f\r\n", divider, remainder, totalShift);
-
-
+//#if ! EFI_PROD_CODE
+//    if (printTriggerTrace) {
+      efiPrintf("trigger_central.cpp: SyncEnginePhase: divider=%d remainder=%d totalShift=%f\r\n", divider, remainder, totalShift);
+//    }
+//#endif /* EFI_PROD_CODE */
 	}
 	return totalShift;
 }
@@ -160,21 +162,34 @@ PUBLIC_API_WEAK angle_t customAdjustCustom(TriggerCentral *tc, vvt_mode_e vvtMod
 	//	UNUSED(vvtMode);
 
 	// Only run this logic for our specific custom mode
-	if (vvtMode == VVT_IAW_4_PLUS_2_CAM) {
+	if (vvtMode == VVT_CUSTOM_1 /* || vvtMode == VVT_IAW_4_PLUS_2_CAM */) {
 		
 		static uint32_t lastCrankCount = 0;
 		
 		// Get the total number of crank teeth seen so far (absolute counter)
 		uint32_t currentCrankCount = tc->triggerState.getSynchronizationCounter();
+
+		if (currentCrankCount < lastCrankCount) {
+			// This is the first event, just initialize lastCrankCount and return no adjustment
+			lastCrankCount = currentCrankCount;
+			return 0;
+		}
 		
 		// Calculate how many crank teeth passed since the last Cam event
 		uint32_t delta = currentCrankCount - lastCrankCount;
 		
+#if ! EFI_PROD_CODE
+    if (printTriggerTrace) {
+	      efiPrintf("IAW_CAM: syncCnt=%d lastCnt=%d delta=%d rem=%d", (int)currentCrankCount, (int)lastCrankCount, 
+			(int)delta, (int)currentCrankCount % 8);
+	    }
+#endif /* EFI_PROD_CODE */
+
 		// Save current count for next time
 		lastCrankCount = currentCrankCount;
 
 		// Safety: Ignore startup noise or first event where delta is huge
-		if (delta == 0 || delta > 20) {
+		if (delta == 0 || delta > 20 || tc->triggerState.hasSynchronizedPhase()) {
 			return 0;
 		}
 
@@ -198,7 +213,7 @@ PUBLIC_API_WEAK angle_t customAdjustCustom(TriggerCentral *tc, vvt_mode_e vvtMod
 		// Case B: The "Long" Gap (User said 5 pulses, math suggests 6)
 		// C3, C4, C5, C6, C7, C0 -> Cam 1. (6 teeth).
 		// Allowing range 5-7 covers both interpretations.
-		else if (delta >= 5) {
+		else if (delta == 6) {
 			// We just finished the gap of ~6 teeth.
 			// This means we are at Cam Event 1.
 			// Based on pattern: Cam 2 -> C3..C0 -> Cam 1.
@@ -258,7 +273,6 @@ static angle_t adjustCrankPhase(int camIndex) {
 	case VVT_HONDA_CBR_600:
 	case VVT_SUBARU_7TOOTH:
 		return tc->syncEnginePhaseAndReport(crankDivider, 0);
-	case VVT_IAW_4_PLUS_2_CAM:
 	case VVT_CUSTOM_25:
 	case VVT_CUSTOM_26:
 	  return customAdjustCustom(tc, vvtMode);
@@ -270,6 +284,7 @@ static angle_t adjustCrankPhase(int camIndex) {
 	case VVT_CUSTOM_1:
 	case VVT_CUSTOM_2:
 	case VVT_INACTIVE:
+	case VVT_IAW_4_PLUS_2_CAM:
 		// do nothing
 		return 0;
 	}
@@ -418,6 +433,18 @@ void handleVvtCamSignal(TriggerValue front, efitick_t nowNt, int index) {
 		// This edge is unimportant, ignore it.
 		return;
 	}
+
+    // Feed sync cam into combined shift register before the sync guard,
+    // so pre-sync cam events contribute to pattern matching.
+    if (index == engineConfiguration->engineSyncCam) {
+        tc->appendCombinedEvent(/*isCrank=*/false);
+  #if ! EFI_PROD_CODE
+        if (printTriggerTrace) {
+            efiPrintf("trigger_central.cpp: handleShaftSignal: Appended: cam");
+        }
+  #endif /* EFI_PROD_CODE */
+    }
+	
 
 	// If the main trigger is not synchronized, don't decode VVT yet
 	if (!tc->triggerState.getShaftSynchronized()) {
@@ -951,6 +978,17 @@ bool TriggerCentral::isToothExpectedNow(efitick_t timestamp) {
 	return true;
 }
 
+// Append one event to the combined shift register.
+// isCrank=true for crank events, false for cam events.
+void TriggerCentral::appendCombinedEvent(bool isCrank) {
+    triggerState.combinedShiftReg =
+        (triggerState.combinedShiftReg << 1) | (isCrank ? 1 : 0);
+    if (triggerState.combinedBitsCollected < 8) {
+        triggerState.combinedBitsCollected++;
+    }
+}
+
+
 PUBLIC_API_WEAK bool boardAllowTriggerActions() { return true; }
 
 angle_t TriggerCentral::findNextTriggerToothAngle(int p_currentToothIndex) {
@@ -974,6 +1012,75 @@ angle_t TriggerCentral::findNextTriggerToothAngle(int p_currentToothIndex) {
 		}
 		return nextToothAngle;
 }
+
+
+/**
+ * Attempt to establish engine phase using the combined crank+cam shift register.
+ * Directly mirrors the RP assembler code: XOR shift register against each table
+ * entry masked to collected bits, count matches, sync if exactly one.
+ *
+ * Returns the syncIndex of the unique match, or -1 if no unique match yet.
+ */
+static int matchCombinedPattern(const TriggerCentral* tc) {
+    const CombinedTriggerPattern* pat = tc->combinedPattern;
+    if (!pat) return -1;
+
+    uint8_t collected = tc->triggerState.combinedBitsCollected;
+
+//    if (collected < pat->windowBits) {
+        // Not enough events yet to attempt matching
+//DEBUG 
+//#if ! EFI_PROD_CODE
+//      if (printTriggerTrace) {
+        efiPrintf("trigger_central.cpp: matchCombinedPattern: collected=%d windowBits=%d", collected, pat->windowBits);
+//      }
+//#endif /* EFI_PROD_CODE */
+
+//        return -1;
+//    }
+    
+
+    // Mask covers the windowBits significant bits (MSB-aligned for 8-bit reg)
+    uint8_t mask = (uint8_t)(0xFF >> (8 - minI(collected, pat->windowBits)));
+    uint8_t shiftReg = tc->triggerState.combinedShiftReg;
+
+//#if ! EFI_PROD_CODE
+//    if (printTriggerTrace) {
+        efiPrintf("trigger_central.cpp: matchCombinedPattern: collected=%d mask=%x shiftReg=%x", collected, mask, shiftReg);
+//    }
+//#endif /* EFI_PROD_CODE */
+
+
+	  int matchCount = 0;
+    int matchedSyncIndex = -1;
+
+    for (int i = 0; i < pat->tableSize; i++) {
+        // XOR then mask: zero means this window candidate matches
+        if (((shiftReg ^ pat->windowTable[i]) & mask) == 0) {
+            matchCount++;
+            matchedSyncIndex = pat->syncIndex[i];
+        }
+    }
+
+    if (matchCount == 1) {
+//#if ! EFI_PROD_CODE
+//      if (printTriggerTrace) {
+        efiPrintf("trigger_central.cpp: matchCombinedPattern: Unique match found. matchedSyncIndex=%d shiftReg=%x", matchedSyncIndex, shiftReg);
+//      }
+//#endif /* EFI_PROD_CODE */
+		return matchedSyncIndex;
+    }
+
+//#if ! EFI_PROD_CODE
+   	//if (printTriggerTrace) {
+   	 efiPrintf("trigger_central.cpp: matchCombinedPattern: None or Multiple matches found. matchCount=%d", matchCount);
+//    }
+//#endif /* EFI_PROD_CODE */
+
+    // 0 = noise/error, >1 = ambiguous (need more events)
+    return -1;
+}
+
 
 /**
  * This method is NOT invoked for VR falls.
@@ -1018,7 +1125,73 @@ void TriggerCentral::handleShaftSignal(trigger_event_e signal, efitick_t timesta
 	efiAssertVoid(ObdCode::CUSTOM_TRIGGER_EVENT_TYPE, eventIndex >= 0 && eventIndex < HW_EVENT_TYPES, "signal type");
 	hwEventCounters[eventIndex]++;
 
-	// Decode the trigger!
+	// Feed crank event into combined shift register, respecting edge filter.
+    if (!triggerShape.useOnlyRisingEdges || signal == SHAFT_PRIMARY_RISING) {
+        appendCombinedEvent(/*isCrank=*/true);
+#if ! EFI_PROD_CODE
+        if (printTriggerTrace) {
+            efiPrintf("trigger_central.cpp: handleShaftSignal: Appended: crank");
+        }
+#endif /* EFI_PROD_CODE */
+    }
+
+    // Combined pattern sync — works from first event, replaces customAdjustCustom
+    // for symmetric crank wheels.
+  if (combinedPattern) {
+    if (!triggerState.allowSynchronization()) {
+      int syncIdx = matchCombinedPattern(this);
+      if (syncIdx >= 0) {
+        triggerState.setCombinedPatternReady(true);
+        triggerState.resetCycleState();  // clear accumulated event counts
+        triggerState.setShaftSynchronized(true);
+
+        int remainder = syncIdx % combinedPattern->crankTeethPerCycle;
+        syncEnginePhaseAndReport(
+          combinedPattern->crankTeethPerCycle,
+          remainder);
+        triggerState.m_combinedCyclePos = syncIdx;
+      }
+    }
+    else {
+      triggerState.m_combinedCyclePos++;
+      if (triggerState.m_combinedCyclePos >= combinedPattern->crankTeethPerCycle) {
+        triggerState.m_combinedCyclePos = 0;
+      }
+
+      if (triggerState.getShaftSynchronized() && triggerState.m_combinedCyclePos == 0) {
+        // Periodic sync validation at index 0
+
+        uint8_t mask = (uint8_t)(0xFF >> 
+          (8 - minI(triggerState.combinedBitsCollected, combinedPattern->windowBits)));
+
+        uint8_t expected = combinedPattern->windowTable[0] & mask;
+        uint8_t shiftReg = triggerState.combinedShiftReg & mask;
+
+        if (expected ^ shiftReg) {
+          // Failed validation, ACK sync lost
+          efiPrintf("Combined pattern sync lost at index=%d; collected=%d; ShiftReg (masked): expected=%02X got=%02X",
+            triggerState.m_combinedCyclePos, 
+            triggerState.combinedBitsCollected,
+            expected, shiftReg);
+
+
+          warning(ObdCode::CUSTOM_ERR_TRIGGER_SYNC,
+            "Combined pattern sync lost at index=%d; collected=%d; ShiftReg: expected=%02X got=%02X",
+             triggerState.m_combinedCyclePos, 
+             triggerState.combinedBitsCollected,
+             expected, shiftReg);
+
+          triggerState.setShaftSynchronized(false);
+          triggerState.setCombinedPatternReady(false);
+          triggerState.resetCycleState();  // clear accumulated event counts
+          triggerState.combinedBitsCollected = 0;
+          triggerState.combinedShiftReg = 0;
+        }
+      }
+    }
+  }
+
+    // Decode the trigger!
 	auto decodeResult = triggerState.decodeTriggerEvent(
 			"trigger",
 			triggerShape,

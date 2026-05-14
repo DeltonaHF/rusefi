@@ -86,6 +86,8 @@ class TriggerDecoderBase : public trigger_state_s {
 public:
 	TriggerDecoderBase(const char* name);
 
+	virtual bool allowSynchronization() const { return true; }
+
   void printGaps(const char * prefix,
     const TriggerConfiguration& triggerConfiguration,
     const TriggerWaveform& triggerShape);
@@ -176,10 +178,10 @@ protected:
 
 	virtual void onNotEnoughTeeth(int, int) { }
 	virtual void onTooManyTeeth(int, int) { }
+	void resetCurrentCycleState();
 
 private:
 	void setTriggerErrorState(int errorIncrement = 1);
-	void resetCurrentCycleState();
 	bool isSyncPoint(const TriggerWaveform& triggerShape, trigger_type_e triggerType) const;
 
 	int getEventCountersError(const TriggerWaveform& triggerShape) const;
@@ -198,6 +200,24 @@ private:
 class PrimaryTriggerDecoder : public TriggerDecoderBase, public trigger_state_primary_s {
 public:
 	PrimaryTriggerDecoder(const char* name);
+
+  void resetCycleState() {
+    resetCurrentCycleState();
+  }
+
+	bool allowSynchronization() const override {
+    	// For combined pattern wheels: suppress sync until pattern match fires.
+    	// For all other wheels: always allow (m_combinedPatternReady starts true).
+    	return m_combinedPatternReady;
+	}
+
+  bool m_combinedSyncPending = false;
+  uint8_t m_combinedCyclePos = 0;
+
+void setCombinedPatternReady(bool ready = true) {
+    m_combinedPatternReady = ready;
+  }
+
 	void resetState() override;
 
 	void resetHasFullSync() {
@@ -231,6 +251,8 @@ public:
 private:
 
 	bool m_needsDisambiguation = false;
+
+  bool m_combinedPatternReady = true; // true = normal behavior (no suppression)
 };
 
 class VvtTriggerDecoder : public TriggerDecoderBase {

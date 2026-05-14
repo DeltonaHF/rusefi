@@ -16,6 +16,7 @@
 #include "pin_repository.h"
 #include "local_version_holder.h"
 #include "cyclic_buffer.h"
+#include "trigger_combined_pattern.h"
 
 #define MAP_CAM_BUFFER 64
 
@@ -24,10 +25,16 @@
 #define RPM_LOW_THRESHOLD 25
 #endif
 
+#if ! EFI_PROD_CODE
+  extern bool printTriggerTrace; 
+#endif // EFI_PROD_CODE
+
 class Engine;
 typedef void (*ShaftPositionListener)(trigger_event_e signal, uint32_t index, efitick_t edgeTimestamp);
 
 #define HAVE_CAM_INPUT() (isBrainPinValid(engineConfiguration->camInputs[0]))
+
+
 
 class TriggerNoiseFilter {
 public:
@@ -49,6 +56,12 @@ public:
 class TriggerCentral final : public trigger_central_s {
 public:
 	TriggerCentral();
+	void appendCombinedEvent(bool isCrank);
+
+    // Set by configure* functions needing combined crank+cam pattern sync.
+    // nullptr = this trigger type does not use this mechanism.
+    const CombinedTriggerPattern* combinedPattern = nullptr;
+
 	/**
 	 * we have two kinds of sync:
 	 * this method is about detecting of exact engine phase with 720 degree precision usually based on cam wheel decoding
@@ -61,7 +74,7 @@ public:
 	void validateCamVvtCounters();
 	void applyShapesConfiguration();
 
-  angle_t findNextTriggerToothAngle(int nextToothIndex);
+    angle_t findNextTriggerToothAngle(int nextToothIndex);
 
 	InstantRpmCalculator instantRpm;
 
