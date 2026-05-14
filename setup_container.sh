@@ -12,12 +12,15 @@ echo "✓ Git safe directory configured"
 apt-get install -y bc > /dev/null 2>&1
 echo "✓ bc installed"
 
+apt install 7zip
+
+
 # Download and set up GCC 11.3 (required - GCC 14 produces broken firmware)
-bash firmware/ChibiOS/tools/provide_gcc.sh
+#bash firmware/ChibiOS/tools/provide_gcc.sh
 echo "✓ GCC 11.3 toolchain ready"
 
 # Add GCC 11.3 to PATH for this session
-export PATH=/rusefi/rusefi/gcc-arm-none-eabi/bin:$PATH
+#export PATH=/rusefi/rusefi/gcc-arm-none-eabi/bin:$PATH
  GCC 11.3 added to PATH"echo "
 
 echo ""
