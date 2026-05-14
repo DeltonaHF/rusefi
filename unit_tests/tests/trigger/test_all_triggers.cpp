@@ -92,6 +92,8 @@ TEST_P(AllTriggersFixture, TestTrigger) {
 	}
 
 	fprintf(fp, "TRIGGERTYPE %d %d %s %.2f\n", tt, shape->getLength(), getTrigger_type_e(tt), shape->tdcPosition);
+  
+  operation_mode_e mode = shape->getWheelOperationMode();
 
 	fprintf(fp, "%s=%s\n", TRIGGER_KNOWN_OPERATION_MODE, shape->knownOperationMode ? "true" : "false");
         fprintf(fp, "%s=%s\n", TRIGGER_MODE, getOperation_mode_e(mode));
