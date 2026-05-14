@@ -202,16 +202,26 @@ void InjectionEvent::onTriggerTooth(efitick_t nowNt, float currentPhase, float n
 	}
 
 	// Schedule opening (stage 1 + stage 2 open together)
-	efitick_t startTime = scheduleByAngle(nullptr, nowNt, angleFromNow, startAction);
+	#define ALTERNATEFUELTIMING 1
+  #if ALTERNATEFUELTIMING
+    // In alternate fuel timing mode, we schedule the injection start purely time based, 
+    // without relying on the angle scheduler. 100 us is an empirically derived minimum lead time to ensure 
+    // safe scheduling.
+    efitick_t startTime = nowNt + US2NT(
+      maxF(angleFromNow * getEngineRotationState()->getOneDegreeUs(), 100.0f));
+    getScheduler()->schedule("inj open", nullptr, startTime, startAction);
+  #else
+    efitick_t startTime = scheduleByAngle(nullptr, nowNt, angleFromNow, startAction);
+  #endif /* ALTERNATEFUELTIMING */
 
 	// Schedule closing stage 1
 	efitick_t turnOffTimeStage1 = startTime + US2NT((int)durationUsStage1);
-	getScheduler()->schedule("inj", nullptr, turnOffTimeStage1, endActionStage1);
+	getScheduler()->schedule("inj end stg1", nullptr, turnOffTimeStage1, endActionStage1);
 
 	// Schedule closing stage 2 (if applicable)
 	if (hasStage2Injection && endActionStage2) {
 		efitick_t turnOffTimeStage2 = startTime + US2NT((int)durationUsStage2);
-		getScheduler()->schedule("inj stage 2", nullptr, turnOffTimeStage2, endActionStage2);
+		getScheduler()->schedule("inj end stg2", nullptr, turnOffTimeStage2, endActionStage2);
 	}
 
 #if EFI_DETAILED_LOGGING

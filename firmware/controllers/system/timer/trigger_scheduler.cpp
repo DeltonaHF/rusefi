@@ -2,6 +2,8 @@
 
 #include "event_queue.h"
 
+static constexpr float SCHEDULE_LOOKAHEAD_US = 350.0f;
+
 bool TriggerScheduler::assertNotInList(AngleBasedEvent *head, AngleBasedEvent *element) {
 	/* this code is just to validate state, no functional load*/
 	decltype(head) current;
@@ -45,8 +47,16 @@ bool TriggerScheduler::scheduleOrQueue(const char *msg, AngleBasedEvent *event,
 		float currentPhase, float nextPhase) {
 	event->setAngle(angle);
 
+  float oneDegreeUs = getEngineRotationState()->getOneDegreeUs();
+  float lookaheadAngle = SCHEDULE_LOOKAHEAD_US / oneDegreeUs;
+  lookaheadAngle = 15.0f; // for testing purposes
+
+  float lookaheadNext = nextPhase + lookaheadAngle;
+  if (lookaheadNext >= engine->engineState.engineCycle)
+    lookaheadNext -= engine->engineState.engineCycle;
+
     // *kludge* naming mess: if (shouldSchedule) { scheduleByAngle } else { schedule } see header for more details
-	if (event->shouldSchedule(currentPhase, nextPhase)) {
+	if (event->shouldSchedule(currentPhase, lookaheadNext)) {
 		// if we're due now, just schedule the event
 		scheduleByAngle(
 			&event->eventScheduling,
@@ -111,9 +121,17 @@ void TriggerScheduler::scheduleEventsUntilNextTriggerTooth(float rpm,
 		m_angleBasedEventsHead = nullptr;
 	}
 
+  float oneDegreeUs = getEngineRotationState()->getOneDegreeUs();
+  float lookaheadAngle = SCHEDULE_LOOKAHEAD_US / oneDegreeUs;
+  lookaheadAngle = 15.0f; // for testing purposes
+
+  float lookaheadNext = nextPhase + lookaheadAngle;  
+  if (lookaheadNext >= engine->engineState.engineCycle)
+    lookaheadNext -= engine->engineState.engineCycle;
+
 	LL_FOREACH_SAFE2(keephead, current, tmp, nextToothEvent)
 	{
-		if (current->shouldSchedule(currentPhase, nextPhase)) {
+		if (current->shouldSchedule(currentPhase, lookaheadNext)) {
 			// time to fire a spark which was scheduled previously
 
 			// Yes this looks like O(n^2), but that's only over the entire engine
