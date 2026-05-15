@@ -1,6 +1,6 @@
 #include "global.h"
 #include "rusefi_enums.h"
-// was generated automatically by rusEFI tool  from rusefi_enums.h // by enum_to_string.jar tool on Sat Apr 18 22:37:15 UTC 2026
+// was generated automatically by rusEFI tool  from rusefi_enums.h // by enum_to_string.jar tool on Fri May 15 08:14:49 UTC 2026
 // see also gen_config_and_enums.bat
 
 
@@ -892,6 +892,8 @@ const char *getOperation_mode_e(operation_mode_e value) {
 			return "FOUR_STROKE_CAM_SENSOR";
 		case FOUR_STROKE_CRANK_SENSOR:
 			return "FOUR_STROKE_CRANK_SENSOR";
+		case FOUR_STROKE_FIVE_TIMES_CRANK_SENSOR:
+			return "FOUR_STROKE_FIVE_TIMES_CRANK_SENSOR";
 		case FOUR_STROKE_FOUR_TIMES_CRANK_SENSOR:
 			return "FOUR_STROKE_FOUR_TIMES_CRANK_SENSOR";
 		case FOUR_STROKE_SIX_TIMES_CRANK_SENSOR:

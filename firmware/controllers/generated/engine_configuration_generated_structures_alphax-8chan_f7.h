@@ -231,7 +231,7 @@ struct ltft_s {
 	 * units: sec
 	 * offset 8
 	 */
-	scaled_channel<uint16_t, 1, 1> timeConstant[STFT_CELL_COUNT] = {};
+	scaled_channel<uint16_t, 10, 1> timeConstant[STFT_CELL_COUNT] = {};
 };
 static_assert(sizeof(ltft_s) == 16);
 
@@ -6407,7 +6407,7 @@ struct persistent_config_s {
 	 */
 	scaled_channel<int16_t, 1, 1> ignitionCltCorrTempBins[CLT_TIMING_TEMP_AXIS_SIZE] = {};
 	/**
-	 * units: Load
+	 * units: {bitStringValue(pressureUnitsLabels, useMetricOnInterface)}
 	 * offset 4988
 	 */
 	scaled_channel<uint8_t, 1, 5> ignitionCltCorrLoadBins[CLT_TIMING_LOAD_AXIS_SIZE] = {};
@@ -6713,7 +6713,7 @@ struct persistent_config_s {
 	 */
 	int8_t ignitionIatCorrTempBins[IAT_IGN_CORR_TEMP_COUNT] = {};
 	/**
-	 * units: Load
+	 * units: {bitStringValue(pressureUnitsLabels, useMetricOnInterface)}
 	 * offset 47160
 	 */
 	scaled_channel<uint8_t, 1, 5> ignitionIatCorrLoadBins[IAT_IGN_CORR_LOAD_COUNT] = {};
@@ -6723,7 +6723,7 @@ struct persistent_config_s {
 	 */
 	int16_t injectionPhase[INJ_PHASE_LOAD_COUNT][INJ_PHASE_RPM_COUNT] = {};
 	/**
-	 * units: Load
+	 * units: {bitStringValue(pressureUnitsLabels, useMetricOnInterface)}
 	 * offset 47680
 	 */
 	uint16_t injPhaseLoadBins[INJ_PHASE_LOAD_COUNT] = {};
@@ -6905,6 +6905,7 @@ struct persistent_config_s {
 	 */
 	int16_t scriptTable4RpmBins[TABLE_4_RPM_SIZE] = {};
 	/**
+	 * units: {bitStringValue(ignLoadUnitLabels, ignLoadUnitIdxPcv)}
 	 * offset 51152
 	 */
 	uint16_t ignTrimLoadBins[IGN_TRIM_SIZE] = {};
@@ -6918,6 +6919,7 @@ struct persistent_config_s {
 	 */
 	ign_cyl_trim_s ignTrims[MAX_CYLINDER_COUNT] = {};
 	/**
+	 * units: {bitStringValue(veLoadUnitLabels, veLoadUnitIdxPcv)}
 	 * offset 51360
 	 */
 	uint16_t fuelTrimLoadBins[FUEL_TRIM_SIZE] = {};
@@ -7633,7 +7635,7 @@ struct persistent_config_s {
 	 */
 	scaled_channel<uint8_t, 1, 50> trailingSparkRpmBins[TRAILING_SPARK_RPM_SIZE] = {};
 	/**
-	 * units: Load
+	 * units: {bitStringValue(pressureUnitsLabels, useMetricOnInterface)}
 	 * offset 56680
 	 */
 	scaled_channel<uint8_t, 1, 5> trailingSparkLoadBins[TRAILING_SPARK_SIZE] = {};

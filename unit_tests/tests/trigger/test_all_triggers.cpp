@@ -101,6 +101,7 @@ TEST_P(AllTriggersFixture, TestTrigger) {
                         mode == FOUR_STROKE_SYMMETRICAL_CRANK_SENSOR ||
                         mode == FOUR_STROKE_THREE_TIMES_CRANK_SENSOR ||
                         mode == FOUR_STROKE_FOUR_TIMES_CRANK_SENSOR ||
+                  			mode == FOUR_STROKE_FIVE_TIMES_CRANK_SENSOR ||
                         mode == FOUR_STROKE_SIX_TIMES_CRANK_SENSOR ||
                         mode == FOUR_STROKE_TWELVE_TIMES_CRANK_SENSOR ||
                         mode == FOUR_STROKE_43_TIMES_CRANK_SENSOR;

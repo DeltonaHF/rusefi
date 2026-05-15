@@ -44,7 +44,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -103,7 +102,6 @@ public class StartupFrame {
     private final StatusAnimation status;
     private final JButton connectButton = new JButton("Connect", new ImageIcon(getClass().getResource("/com/rusefi/connect48.png")));
     private ProgramSelector selector;
-    private boolean firstTimeHasEcuWithOpenBlt = true;
     private boolean firstTimeAutoConnect = true;
 
     private final StatusPanelWithProgressBar firmwareStatusPanel = new StatusPanelWithProgressBar();
@@ -247,10 +245,7 @@ public class StartupFrame {
         selector = new ProgramSelector(connectivityContext, portsComboBox.getComboPorts());
         selector.setJobExecutor(asyncJobExecutor);
 
-        JButton goToFirmwareTab = new JButton("Update Firmware", AutoupdateUtil.loadIcon("upload48.png"));
-        goToFirmwareTab.addActionListener(e -> outerTabs.setSelectedIndex(0));
         realHardwarePanel.add(new HorizontalLine(), "right, wrap");
-        realHardwarePanel.add(goToFirmwareTab, "right, wrap");
 
         JButton openTunerStudio = new JButton("Open TunerStudio");
         setToolTip(openTunerStudio, "Launch TunerStudio and close this console so the serial port is released");
@@ -489,12 +484,6 @@ public class StartupFrame {
 
         noPortsMessage.setVisible(ports.isEmpty() || !hasEcuOrBootloader);
 
-        boolean hasEcuWithOpenBlt = !ports.stream().filter(portResult -> portResult.type == EcuWithOpenblt).collect(Collectors.toList()).isEmpty();
-        if (hasEcuWithOpenBlt && firstTimeHasEcuWithOpenBlt) {
-            selector.setMode(UpdateMode.OPENBLT_AUTO);
-            firstTimeHasEcuWithOpenBlt = false;
-        }
-
         AutoupdateUtil.trueLayoutAndRepaint(connectPanel);
 
         // Kick off auto-connect last — combo is already populated, so if this fails and we revert
@@ -730,22 +719,12 @@ public class StartupFrame {
         };
     }
 
-    public void showUpdateBanner(String message) {
-        // Use null parent if StartupFrame was already disposed (user connected to a ecu before update finished)
-        Component parent = frame.isDisplayable() ? frame : null;
-        int choice = JOptionPane.showConfirmDialog(
-            parent,
-            message + "\nRestart now to apply it?",
-            "Update Ready",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.INFORMATION_MESSAGE
-        );
-        if (choice == JOptionPane.YES_OPTION) {
-            if (frame.isDisplayable())
-                disposeFrameAndProceed();
-            SimulatorHelper.onWindowClosed();
-            Autoupdate.relaunchConsole();
-        }
+    public void restartConsole() {
+        // not much point requesting an extra click - if we have updated, we shall restart
+        if (frame.isDisplayable())
+            disposeFrameAndProceed();
+        SimulatorHelper.onWindowClosed();
+        Autoupdate.relaunchConsole();
     }
 
     private void saveTabIndex() {

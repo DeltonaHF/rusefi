@@ -3,13 +3,19 @@ package com.rusefi.core;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 public class SensorsHolder {
     // Keys are normalized to lower-case (Locale.US) so that "TPSValue", "tpsvalue", "TPSVALUE"
     // all resolve to the same entry, with O(1) HashMap lookup instead of O(log N) TreeMap comparison.
     // Values stored as single-element double[] to avoid boxing on every update.
     // The array is allocated once per channel name and mutated in place thereafter.
+    // todo: probably not worth migrating to AtomicDouble with longBitsToDouble
     private final Map<String, double[]> values = new HashMap<>();
+
+    public Set<String> getSensorNames() {
+        return values.keySet();
+    }
 
     public double getValue(Sensor sensor) {
         return getValue(sensor.getNativeName());

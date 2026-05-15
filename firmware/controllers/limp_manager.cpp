@@ -34,14 +34,15 @@ static bool noFiringUntilVvtSync() {
 	bool result =
 		operationMode == FOUR_STROKE_SYMMETRICAL_CRANK_SENSOR ||
 		operationMode == FOUR_STROKE_THREE_TIMES_CRANK_SENSOR ||
-                operationMode == FOUR_STROKE_FOUR_TIMES_CRANK_SENSOR ||
-                operationMode == FOUR_STROKE_SIX_TIMES_CRANK_SENSOR ||
-                operationMode == FOUR_STROKE_TWELVE_TIMES_CRANK_SENSOR ||
-                operationMode == FOUR_STROKE_43_TIMES_CRANK_SENSOR;
-        if (result) {
-                warningTsReport(ObdCode::CUSTOM_SYMMETRICAL_CRANK, "Your crank wheel requires cam sync before firing");
-        }
-        return result;
+    operationMode == FOUR_STROKE_FOUR_TIMES_CRANK_SENSOR ||
+ 		operationMode == FOUR_STROKE_FIVE_TIMES_CRANK_SENSOR ||
+    operationMode == FOUR_STROKE_SIX_TIMES_CRANK_SENSOR ||
+    operationMode == FOUR_STROKE_TWELVE_TIMES_CRANK_SENSOR ||
+    operationMode == FOUR_STROKE_43_TIMES_CRANK_SENSOR;
+  if (result) {
+    warningTsReport(ObdCode::CUSTOM_SYMMETRICAL_CRANK, "Your crank wheel requires cam sync before firing");
+  }
+  return result;
 }
 #endif // EFI_SHAFT_POSITION_INPUT
 

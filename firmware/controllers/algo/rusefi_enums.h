@@ -302,9 +302,13 @@ typedef enum {
 	 */
 	FOUR_STROKE_SIX_TIMES_CRANK_SENSOR = 7,
 
-	FOUR_STROKE_FOUR_TIMES_CRANK_SENSOR = 8,
+	// Same pattern repeated five times per crank revolution.
+	// Used by some V10 engines (e.g. Dodge Viper) whose crank trigger has 5-fold symmetry.
+	FOUR_STROKE_FIVE_TIMES_CRANK_SENSOR = 8,
 
-	FOUR_STROKE_43_TIMES_CRANK_SENSOR = 9,
+  FOUR_STROKE_FOUR_TIMES_CRANK_SENSOR = 9,
+
+	FOUR_STROKE_43_TIMES_CRANK_SENSOR = 10,
 
 } operation_mode_e;
 

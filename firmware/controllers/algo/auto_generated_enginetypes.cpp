@@ -1,6 +1,6 @@
 #include "global.h"
 #include "engine_types.h"
-// was generated automatically by rusEFI tool  from engine_types.h // by enum_to_string.jar tool on Sat Apr 18 22:37:16 UTC 2026
+// was generated automatically by rusEFI tool  from engine_types.h // by enum_to_string.jar tool on Fri May 15 08:14:50 UTC 2026
 // see also gen_config_and_enums.bat
 
 
@@ -377,8 +377,34 @@ const char *getTrigger_type_e(trigger_type_e value) {
 			return "TT_TRI_TACH";
 		case trigger_type_e::TT_UNUSED:
 			return "TT_UNUSED";
-		case trigger_type_e::TT_UNUSED_96:
-			return "TT_UNUSED_96";
+		case trigger_type_e::TT_UNUSED_100:
+			return "TT_UNUSED_100";
+		case trigger_type_e::TT_UNUSED_101:
+			return "TT_UNUSED_101";
+		case trigger_type_e::TT_UNUSED_102:
+			return "TT_UNUSED_102";
+		case trigger_type_e::TT_UNUSED_103:
+			return "TT_UNUSED_103";
+		case trigger_type_e::TT_UNUSED_104:
+			return "TT_UNUSED_104";
+		case trigger_type_e::TT_UNUSED_105:
+			return "TT_UNUSED_105";
+		case trigger_type_e::TT_UNUSED_106:
+			return "TT_UNUSED_106";
+		case trigger_type_e::TT_UNUSED_107:
+			return "TT_UNUSED_107";
+		case trigger_type_e::TT_UNUSED_108:
+			return "TT_UNUSED_108";
+		case trigger_type_e::TT_UNUSED_109:
+			return "TT_UNUSED_109";
+		case trigger_type_e::TT_UNUSED_97:
+			return "TT_UNUSED_97";
+		case trigger_type_e::TT_UNUSED_98:
+			return "TT_UNUSED_98";
+		case trigger_type_e::TT_UNUSED_99:
+			return "TT_UNUSED_99";
+		case trigger_type_e::TT_VIPER_V10_CRANK:
+			return "TT_VIPER_V10_CRANK";
 		case trigger_type_e::TT_VVT_BARRA_3_PLUS_1:
 			return "TT_VVT_BARRA_3_PLUS_1";
 		case trigger_type_e::TT_VVT_BOSCH_QUICK_START:

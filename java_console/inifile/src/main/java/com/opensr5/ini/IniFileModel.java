@@ -95,4 +95,14 @@ public interface IniFileModel {
     FrontPageModel getFrontPage();
 
     List<MenuModel> getMenus();
+
+    Map<String, String> getControllerCommands();
+
+    List<VeAnalyzeMap> getVeAnalyzeMaps();
+
+    List<String> getLambdaTargetTables();
+
+    List<VeAnalyzeFilter> getVeAnalyzeFilters();
+
+    List<EventTriggerModel> getEventTriggers();
 }

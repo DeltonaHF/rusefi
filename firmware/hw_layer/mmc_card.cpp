@@ -314,14 +314,14 @@ static void sdStatistics() {
 			sdStatusName(sdStatus));
 #if HAL_USE_MMC_SPI
 	printSpiConfig("SD", mmcSpiDevice);
- #if defined(STM32F4XX) || defined(STM32F7XX)
+#if defined(STM32F4XX) || defined(STM32F7XX)
 	efiPrintf("HS clock %d Hz", spiGetBaseClock(mmccfg.spip) / (2 << ((mmc_hs_spicfg.cr1 & SPI_CR1_BR_Msk) >> SPI_CR1_BR_Pos)));
 	efiPrintf("LS clock %d Hz", spiGetBaseClock(mmccfg.spip) / (2 << ((mmc_ls_spicfg.cr1 & SPI_CR1_BR_Msk) >> SPI_CR1_BR_Pos)));
- #else
-  efiPrintf("not implemented");
- #endif
 #else
- efiPrintf("SDIO mode");
+	efiPrintf("not implemented");
+#endif
+#else
+	efiPrintf("SDIO mode");
 #endif
 	if (sdLoggerIsReady()) {
 		efiPrintf("filename=%s size=%d", logName, logBuffer.writen());
@@ -996,22 +996,22 @@ static int mlgLogger() {
 }
 
 static int sdTriggerLogger() {
-	size_t toWrite = 0;
+	int ret = 0;
 #if EFI_TOOTH_LOGGER
 	auto buffer = GetToothLoggerBufferBlocking();
 
 	// can return nullptr
 	if (buffer) {
-		toWrite = buffer->nextIdx * sizeof(composite_logger_s);
-		logBuffer.write(reinterpret_cast<const char*>(buffer->buffer), toWrite);
+		ret = buffer->nextIdx * sizeof(composite_logger_s);
+		logBuffer.write(reinterpret_cast<const char*>(buffer->buffer), ret);
 		if (logBuffer.failed) {
-			return -1;
+			ret = -1;
 		}
 
 		ReturnToothLoggerBuffer(buffer);
 	}
 #endif /* EFI_TOOTH_LOGGER */
-	return toWrite;
+	return ret;
 }
 
 #endif // EFI_PROD_CODE

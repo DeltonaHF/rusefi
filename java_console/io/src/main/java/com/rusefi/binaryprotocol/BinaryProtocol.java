@@ -276,7 +276,6 @@ public class BinaryProtocol {
                                 if (linkManager.isNeedPullLiveData()) {
                                     LiveDocsRegistry.LiveDataProvider liveDataProvider = LiveDocsRegistry.getLiveDataProvider();
                                     LiveDocsRegistry.INSTANCE.refresh(liveDataProvider);
-                                    log.info(stream + ": Got livedata");
                                 }
                             }
                         });
@@ -741,6 +740,11 @@ public class BinaryProtocol {
         }
     }
 
+    /**
+     * This is a blocking method which would fetch all output channels from the controller.
+     *
+     * @return true if successful
+     */
     public boolean requestOutputChannels() {
         if (stream.isClosed())
             return false;

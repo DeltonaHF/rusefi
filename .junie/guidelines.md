@@ -43,6 +43,18 @@ That .ini file would be parsed into IniFileModel instance giving java code knowl
 - rusefi_updater.exe (see console_launcher folder for launch4j) invokes Launcher#main with empty args; the merged launcher handles both the autoupdate flow and the console UI
 - rusefi_autoupdate.exe entry point is Autoupdate#main
 
+#### TS templating:
+- Pattern: `#define CAM_INPUT_1_1_NAME "Cam sensor bank 1 intake"` in `rusefi_config.txt`
+- Usage: `@@CAM_INPUT_1_1_NAME@@` in `tunerstudio.template.ini`
+- This pattern is used for dynamic strings in the TunerStudio UI.
+
+#### Autoupdate:
+- Logic for bypassing: Caps Lock key skips the automatic update process.
+- Configuration: `autoupdate_bundle=true` in `shared_io.properties` controls the global auto-update behavior.
+
+#### subject domain
+- Timing: In the context of engine control, "timing" usually refers to **ignition timing advance** (the angle before TDC when the spark occurs).
+
 #### Key frontend java application classes
 AbstractIoStream: Base class for communication streams that manages byte counters, activity tracking, and listener notification.
 
@@ -89,3 +101,7 @@ GaugesGrid: Manages the visual container by wrapping a JPanel with a GridLayout 
 GaugesGridElement: Acts as a factory wrapper for individual slots, toggling between gauge and graph modes based on persistent Node configuration.
 
 See CLAUDE.md
+
+### Coding Style
+- Always use curly brackets for `if` statements, even for single-line blocks.
+
