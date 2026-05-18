@@ -55,3 +55,35 @@ bean_encoder_test.csv
 venv/
 coverage_reports/
 
+
+# GPIO register dump files (debugging artifacts)
+AFRH
+AFRL
+MODER
+ODR
+OSPEEDR
+OTYPER
+PUPDR
+afrh
+afrl
+moder
+odr
+ospeedr
+otyper
+pupdr
+
+# Working/backup files
+firmware/tunerstudio/tunerstudio.template.ini.bak
+firmware/integration/rusefi_config_beforeVoltTables.txt
+firmware/integration/rusefi_config_new.txt
+firmware/rusefi.ini.7z
+firmware/init/sensor/init_thermistors.cpp.orig
+firmware/config/boards/RP-f405-board/$ntc_table_sensors.cpp$
+patch_temp_deleteme/
+unit_tests/triggers.md
+
+# Build artifacts
+gcc-arm-none-eabi/
+java_tools/gcc_map_reader.jar
+firmware/bootloader/openblt_stm32f4_discovery.bin
+firmware/bootloader/openblt_stm32f4_discovery.hex
