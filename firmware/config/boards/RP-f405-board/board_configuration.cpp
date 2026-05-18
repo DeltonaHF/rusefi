@@ -127,16 +127,19 @@ static void rp_f405_boardDefaultConfiguration() {
     engineConfiguration->vehicleSpeedSensorInputPin = Gpio::B13;
 
     // === Ignition outputs ===
-    // 3.3 V logic outputs; coil drivers (TC4427 or smart coils) handle the high side.
-    engineConfiguration->ignitionPins[0] = Gpio::C1;   // IGN1 (OEM pin 25)
-    engineConfiguration->ignitionPins[1] = Gpio::C2;   // IGN2 (OEM pin 26)
+    // 3.3 V logic outputs; coil drivers 
+    // default IAW wasted spark, alternative TC4427 and/or smart coils.
+    engineConfiguration->ignitionPinMode = OM_INVERTED;
+    engineConfiguration->ignitionMode = IM_WASTED_SPARK;
+    engineConfiguration->ignitionPins[0] = Gpio::C2;   // IGN1 (OEM pin 26)
+    engineConfiguration->ignitionPins[1] = Gpio::C1;   // IGN2 (OEM pin 25)
     engineConfiguration->ignitionPins[2] = Gpio::C3;   // IGN3
     engineConfiguration->ignitionPins[3] = Gpio::C4;   // IGN4
 
     // === Injection outputs ===
     engineConfiguration->injectionPins[0] = Gpio::B10;  // INJ1 (OEM pin 35)
-    engineConfiguration->injectionPins[1] = Gpio::B11;  // INJ2 (OEM pin 32)
-    engineConfiguration->injectionPins[2] = Gpio::B15;  // INJ3 (OEM pin 33)
+    engineConfiguration->injectionPins[1] = Gpio::B15;  // INJ2 (OEM pin 32)
+    engineConfiguration->injectionPins[2] = Gpio::B11;  // INJ3 (OEM pin 33)
     engineConfiguration->injectionPins[3] = Gpio::B12;  // INJ4 (OEM pin 18)
 
     // === Analog sensors ===
@@ -155,6 +158,7 @@ static void rp_f405_boardDefaultConfiguration() {
     // PB0 = IAC_PWM_OUT (OEM ECU pin 34); TIM3_CH3 available via AF2.
     engineConfiguration->idle.solenoidPin       = Gpio::B0;
     engineConfiguration->idle.solenoidFrequency = 200;
+    engineConfiguration->idle.solenoidPinMode = OM_INVERTED; // active-low driver is used
 
     // === PWM outputs ===
     // PA15 = OBV overboost valve (OEM ECU pin 16), TIM2_CH1 via AF1.
@@ -171,6 +175,7 @@ static void rp_f405_boardDefaultConfiguration() {
     // === Fuel pump relay ===
     // PC13 has a 3 mA drive limit; ensure a transistor/MOSFET driver is in circuit.
     engineConfiguration->fuelPumpPin = Gpio::C13;
+    engineConfiguration->fuelPumpPinMode = OM_INVERTED; // active-low driver is used
 
     // === MIL (check engine light) ===
     // PB5 = MIL_D_OUT (OEM ECU pin 12).
