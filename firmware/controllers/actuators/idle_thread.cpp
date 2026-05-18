@@ -404,8 +404,6 @@ float IdleController::getIdlePosition(float rpm) {
 			  isIdleClosedLoop = false;
 			}
 
-			iacPosition = clampPercentValue(iacPosition);
-
 // todo: while is below disabled for unit tests?
 #if EFI_TUNER_STUDIO && (EFI_PROD_CODE || EFI_SIMULATOR)
 
@@ -443,7 +441,16 @@ float IdleController::getIdlePosition(float rpm) {
 			iacPosition = idlePos;
 		}
 
-		currentIdlePosition = iacPosition;
+    // Translate requested IAC position to actual duty cycle via transfer function table
+    iacPosition = interpolate2d(iacPosition, config->iacLinBins, config->iacLin);
+
+    // Battery voltage compensation (multiplicative, accounts for RL load I = V*duty/R)
+    float vbat = Sensor::get(SensorType::BatteryVoltage).value_or(14.0f);
+    float vbatCorrection = interpolate2d(vbat, config->iacVbatMultBins, config->iacVbatMult);
+    iacPosition *= vbatCorrection;
+
+    iacPosition = clampPercentValue(iacPosition);  // re-clamp after scaling
+    currentIdlePosition = iacPosition;
 
 	bool acActive = engine->module<AcController>().unmock().acButtonState;
 	bool fan1Active = enginePins.fanRelay.getLogicValue();

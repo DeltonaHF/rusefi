@@ -1964,9 +1964,16 @@ float[TMF_RATIO_SIZE x TMF_SIZE] tmfTable;;"", 1, 0, 0, 255, 2
         int8_t[ETB_BIAS_CURVE_LENGTH] dcWastegateBiasBins;target Wastegate value, 0 to 100%;"target DC position", 1, 0, 0, 100, 0
         int16_t[ETB_BIAS_CURVE_LENGTH] autoscale dcWastegateBiasValues;PWM bias, open loop component of PID closed loop control;"DC wastegate duty cycle bias", 0.01, 0, -100, 100, 2
 
+#define IAC_VBATT_MULT_SIZE 8
+	uint8_t[IAC_VBATT_MULT_SIZE] autoscale iacVbatMultBins;IAC duty cycle battery voltage correction voltage bins;"volts", 0.1, 0, 0, 22, 1
+	uint8_t[IAC_VBATT_MULT_SIZE] autoscale iacVbatMult;IAC duty cycle battery voltage correction multiplier (1.0 = no correction);"mult", 0.01, 0, 0, 2.55, 2
+
+#define IAC_LIN_SIZE 8
+	uint8_t[IAC_LIN_SIZE] autoscale iacLinBins;IAC linearisation input bins (requested position);"percent", 0.5, 0, 0, 100, 1
+	uint8_t[IAC_LIN_SIZE] autoscale iacLin;IAC linearisation output (duty cycle);"percent", 0.5, 0, 0, 100, 1
+
 #define IAC_PID_MULT_SIZE 8
 #define IAC_PID_MULT_RPM_SIZE 8
-
 	uint8_t[IAC_PID_MULT_SIZE x IAC_PID_MULT_SIZE] autoscale iacPidMultTable;;"%", 0.05, 0, 0, 10, 2
 	uint8_t[IAC_PID_MULT_SIZE] iacPidMultLoadBins;;"Load", 1, 0, 0, 250, 2
 	uint8_t[IAC_PID_MULT_RPM_SIZE] autoscale iacPidMultRpmBins;;"RPM", 10, 0, 0, 2500, 0

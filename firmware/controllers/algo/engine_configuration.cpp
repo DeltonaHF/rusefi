@@ -365,6 +365,15 @@ static void setDefaultIdleOpenLoopParameters() {
 	for (size_t i = 0; i < CLT_IDLE_TABLE_RPM_SIZE; i++) {
 		setLinearCurve(config->cltIdleCorrTable[i], 75.0, 50, 5);
 	}
+
+  // IAC battery voltage correction defaults (14.0/V, nominal 14V = 1.0)
+  copyArray(config->iacVbatMultBins,  {8.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f});
+  copyArray(config->iacVbatMult,      {1.75f, 1.40f, 1.27f, 1.17f, 1.08f, 1.00f, 0.93f, 0.88f});
+
+  //IAC linearisation defaults (Marelli VAE06)
+  copyArray(config->iacLinBins, {0.0f,  6.5f, 25.0f, 50.0f, 75.0f, 87.5f, 94.0f, 100.0f});
+  copyArray(config->iacLin,     {20.0f, 30.5f, 39.5f, 46.5f, 57.0f, 63.0f, 88.5f, 100.0f});
+
 }
 
 /**
