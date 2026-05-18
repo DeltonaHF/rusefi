@@ -319,9 +319,11 @@ void rpmShaftPositionCallback(trigger_event_e ckpSignalType,
 	if (alwaysInstantRpm) {
 		rpmState->setRpmValue(instantRpm);
 	} else if (rpmState->isSpinningUp()) {
-		rpmState->assignRpmValue(instantRpm);
+    if (instantRpm > 0) {          // ← add this guard
+  		rpmState->assignRpmValue(instantRpm);
+    }
 #if 0
-		efiPrintf("** RPM: idx=%d sig=%d iRPM=%d", trgEventIndex, ckpSignalType, instantRpm);
+		efiPrintf("** RPM: idx=%d sig=%d iRPM=%d", (uint16_t)trgEventIndex, ckpSignalType, (uint16_t)instantRpm);
 #else
 		UNUSED(ckpSignalType);
 #endif
