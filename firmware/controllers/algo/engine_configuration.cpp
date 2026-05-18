@@ -507,6 +507,7 @@ static void setDefaultEngineConfiguration() {
 
 // Default voltage/temperature table for CLT (sensible NTC-like defaults, 0-5V range)
     // Users should calibrate these to their actual sensor+circuit response
+/*
     static const float defaultVolts[VOLTAGE_TABLE_SIZE] = {
         0.20f, 0.40f, 0.60f, 0.80f, 1.00f, 1.30f, 1.60f, 1.90f,
         2.20f, 2.60f, 3.00f, 3.40f, 3.70f, 4.00f, 4.30f, 4.70f
@@ -519,6 +520,22 @@ static void setDefaultEngineConfiguration() {
         100,  90,  80,  70,  60,  50,  40,  30,
          20,  10,   0, -10, -20, -30, -40, -50
     };
+*/
+    static const float defaultVolts[VOLTAGE_TABLE_SIZE] = {
+        0.622f, 0.652f, 0.702f, 0.785f, 0.929f, 1.109f, 1.312f, 1.512f,
+        1.747f, 2.185f, 2.709f, 3.016f, 3.171f, 3.301f, 3.407f, 3.513f
+    };
+//WTS05 sensor
+    static const float defaultCltTemps[VOLTAGE_TABLE_SIZE] = {
+        120.0f, 112.0f, 102.0f,  90.0f,  76.0f,  64.0f,  54.0f,  46.0f,
+         38.0f,  25.0f,  10.0f,   0.0f,  -6.0f, -12.0f, -18.0f, -26.0f
+    };
+//ATS04 sensor
+    static const float defaultIatTemps[VOLTAGE_TABLE_SIZE] = {
+        120.0f, 112.0f, 102.0f,  90.0f,  76.0f,  64.0f,  54.0f,  46.0f,
+         38.0f,  25.0f,  10.0f,   0.0f,  -6.0f, -12.0f, -18.0f, -26.0f
+    };
+
     for (int i = 0; i < VOLTAGE_TABLE_SIZE; i++) {
         engineConfiguration->cltVoltageTable.voltageTable[i] = defaultVolts[i];
         engineConfiguration->cltVoltageTable.tempCTable[i] = defaultCltTemps[i];
