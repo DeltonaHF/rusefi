@@ -19,6 +19,7 @@ public:
 
 	void onPrimeStart();
 	void onPrimeEnd();
+  void onTriggerSignal();
 
 	bool isPriming() const {
 		return m_isPriming;

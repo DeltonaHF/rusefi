@@ -1,4 +1,5 @@
 struct_no_prefix prime_injection_s
   bit m_isPriming;"IsFuelPriming"
+  bit m_isPrimeArmed;"IsFuelPrimingArmed"
 end_struct
 

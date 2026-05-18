@@ -150,11 +150,11 @@ angle_t TriggerCentral::syncEnginePhaseAndReport(int divider, int remainder) {
 		instantRpm.resetInstantRpm();
 
 //DEBUG ("SyncEnginePhase: divider=%d remainder=%d totalShift=%f", divider, remainder, totalShift);
-//#if ! EFI_PROD_CODE
-//    if (printTriggerTrace) {
+#if ! EFI_PROD_CODE
+    if (printTriggerTrace) {
       efiPrintf("trigger_central.cpp: SyncEnginePhase: divider=%d remainder=%d totalShift=%f\r\n", divider, remainder, totalShift);
-//    }
-//#endif /* EFI_PROD_CODE */
+    }
+#endif /* EFI_PROD_CODE */
 	}
 	return totalShift;
 }
@@ -182,8 +182,8 @@ PUBLIC_API_WEAK angle_t customAdjustCustom(TriggerCentral *tc, vvt_mode_e vvtMod
 		
 #if ! EFI_PROD_CODE
     if (printTriggerTrace) {
-	      efiPrintf("IAW_CAM: syncCnt=%d lastCnt=%d delta=%d rem=%d", (int)currentCrankCount, (int)lastCrankCount, 
-			(int)delta, (int)currentCrankCount % 8);
+      efiPrintf("IAW_CAM: syncCnt=%d lastCnt=%d delta=%d rem=%d", (int)currentCrankCount, (int)lastCrankCount, 
+  			(int)delta, (int)currentCrankCount % 8);
 	    }
 #endif /* EFI_PROD_CODE */
 
@@ -1111,6 +1111,9 @@ void TriggerCentral::handleShaftSignal(trigger_event_e signal, efitick_t timesta
 
 	isSpinningJustForWatchdog = true;
 
+	// Trigger-based prime: fire on first shaft signal after key-on
+	engine->module<PrimeController>()->onTriggerSignal();
+
 #if EFI_HD_ACR
     bool firstEventInAWhile = m_lastEventTimer.hasElapsedSec(1);
 	if (firstEventInAWhile) {
@@ -1152,6 +1155,22 @@ void TriggerCentral::handleShaftSignal(trigger_event_e signal, efitick_t timesta
           combinedPattern->crankTeethPerCycle,
           remainder);
         triggerState.m_combinedCyclePos = syncIdx;
+
+        // Bootstrap RPM from current tooth duration so mainTriggerCallback
+        // doesn't skip the first trigger event due to rpm==0.
+        // toothDurations[0] is the last tooth period in NT units.
+        if (triggerState.toothDurations[0] > 0 && 
+          engine->rpmCalculator.getCachedRpm() == 0) {
+        // One tooth = 90 degrees = 1/4 revolution
+        // Period of one revolution = toothDurations[0] * 4
+        // RPM = 60 / (period_in_seconds)
+          float toothPeriodSeconds = NT2US(triggerState.toothDurations[0]) / US_PER_SECOND_F;
+          float estimatedRpm = 60.0f / (toothPeriodSeconds * 4.0f);
+
+          engine->rpmCalculator.assignRpmValue(estimatedRpm);
+
+          efiPrintf("Combined pattern sync: estimated initial RPM=%.1f based on tooth period of %.2f ms", estimatedRpm, toothPeriodSeconds * 1000);
+        }
       }
     }
     else {
@@ -1201,6 +1220,8 @@ void TriggerCentral::handleShaftSignal(trigger_event_e signal, efitick_t timesta
 			primaryTriggerConfiguration,
 			signal, timestamp);
 
+//  efiPrintf("trigger_central.cpp: handleShaftSignal: decodeResult=%s", decodeResult?"expected":"unexpected");
+
 	// Don't propagate state if we don't know where we are
 	if (decodeResult) {
 		ScopePerf perf(PE::ShaftPositionListeners);
@@ -1217,6 +1238,8 @@ void TriggerCentral::handleShaftSignal(trigger_event_e signal, efitick_t timesta
 
 		// Look up this tooth's angle from the sync point. If this tooth is the sync point, we'll get 0 here.
 		auto currentPhaseFromSyncPoint = getTriggerCentral()->triggerFormDetails.eventAngles[triggerIndexForListeners];
+    // efiPrintf("trigger_central.cpp: handleShaftSignal: currentPhaseFromSyncPoint=%f, triggerIndexForListeners=%d", 
+    //   currentPhaseFromSyncPoint, triggerIndexForListeners);
 
 		// Adjust so currentPhase is in engine-space angle, not trigger-space angle
 		currentEngineDecodedPhase = wrapAngleMethod(currentPhaseFromSyncPoint - tdcPosition(), "currentEnginePhase", ObdCode::CUSTOM_ERR_6555);
@@ -1232,7 +1255,7 @@ void TriggerCentral::handleShaftSignal(trigger_event_e signal, efitick_t timesta
 		}
 
 #if TRIGGER_EXTREME_LOGGING
-	efiPrintf("trigger %d %d %d", triggerIndexForListeners, getRevolutionCounter(), time2print(getTimeNowUs()));
+	efiPrintf("trigger %d %d %d", triggerIndexForListeners, (uint16_t)getRevolutionCounter(), time2print(getTimeNowUs()));
 #endif /* TRIGGER_EXTREME_LOGGING */
 
 		// Update engine RPM

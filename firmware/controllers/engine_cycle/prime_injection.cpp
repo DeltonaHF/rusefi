@@ -11,6 +11,8 @@
 #include "microsecond_timer.h"
 #endif
 
+#define FUEL_PRIME_ON_TRIGGER 1
+
 floatms_t PrimeController::getPrimeDuration() const {
 	auto clt = Sensor::get(SensorType::Clt);
 
@@ -62,18 +64,40 @@ void PrimeController::onIgnitionStateChanged(bool ignitionOn) {
 
 	// start prime injection if this is a 'fresh start'
 	if (ignSwitchCounter == 0) {
-		// Give sensors long enough to wake up before priming
+    efiPrintf("prime_injection.cpp: onIgnitionStateChanged: Prime armed, waiting 1st trigger signal");    
+#if FUEL_PRIME_ON_TRIGGER    
+		m_isPrimeArmed = true;
+#else    
+
+    // Give sensors long enough to wake up before priming
 		constexpr float minimumPrimeDelayMs = 100;
 		int32_t primeDelayNt = assertFloatFitsInto32BitsAndCast("primingDelay", MSF2NT(engineConfiguration->primingDelay * 1000 + minimumPrimeDelayMs));
 
 		auto startTime = getTimeNowNt() + primeDelayNt;
 		getScheduler()->schedule("primingDelay", nullptr, startTime, action_s::make<onPrimeStartAdapter>( this ));
+#endif /* FUEL_PRIME_ON_TRIGGER */
 	} else {
 		efiPrintf("Skipped priming pulse since ignSwitchCounter = %lu", ignSwitchCounter);
 	}
 
 	// we'll reset it later when the engine starts
 	setKeyCycleCounter(ignSwitchCounter + 1);
+}
+
+void PrimeController::onTriggerSignal() {
+#if FUEL_PRIME_ON_TRIGGER
+  if (!m_isPrimeArmed) {
+		return;
+	}
+	// Clear before firing so a second edge can't re-trigger during injection
+	m_isPrimeArmed = false;
+
+  // We want to call this as scheduled action (below) to avoid any possible issues 
+  // with calling injection code from trigger ISR
+  //onPrimeStart(); 
+  
+    getScheduler()->schedule("primingDelay", nullptr, getTimeNowNt(), action_s::make<onPrimeStartAdapter>(this));
+#endif /* FUEL_PRIME_ON_TRIGGER */    
 }
 
 void PrimeController::setKeyCycleCounter(uint32_t count) {

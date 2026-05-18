@@ -49,7 +49,6 @@ bool TriggerScheduler::scheduleOrQueue(const char *msg, AngleBasedEvent *event,
 
   float oneDegreeUs = getEngineRotationState()->getOneDegreeUs();
   float lookaheadAngle = SCHEDULE_LOOKAHEAD_US / oneDegreeUs;
-  lookaheadAngle = 15.0f; // for testing purposes
 
   float lookaheadNext = nextPhase + lookaheadAngle;
   if (lookaheadNext >= engine->engineState.engineCycle)
@@ -123,7 +122,7 @@ void TriggerScheduler::scheduleEventsUntilNextTriggerTooth(float rpm,
 
   float oneDegreeUs = getEngineRotationState()->getOneDegreeUs();
   float lookaheadAngle = SCHEDULE_LOOKAHEAD_US / oneDegreeUs;
-  lookaheadAngle = 15.0f; // for testing purposes
+//  lookaheadAngle = 15.0f; // for testing purposes
 
   float lookaheadNext = nextPhase + lookaheadAngle;  
   if (lookaheadNext >= engine->engineState.engineCycle)
@@ -147,7 +146,7 @@ void TriggerScheduler::scheduleEventsUntilNextTriggerTooth(float rpm,
 
 #if SPARK_EXTREME_LOGGING
 			efiPrintf("time to invoke [%.1f, %.1f) %d %d",
-				  currentPhase, nextPhase, getRevolutionCounter(), time2print(getTimeNowUs()));
+				  currentPhase, nextPhase, (uint16_t)getRevolutionCounter(), time2print(getTimeNowUs()));
 #endif /* SPARK_EXTREME_LOGGING */
 
 			// In case this event was scheduled by overdwell protection, cancel it so

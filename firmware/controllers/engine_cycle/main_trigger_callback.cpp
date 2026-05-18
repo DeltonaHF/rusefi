@@ -23,8 +23,8 @@
 
 #include "pch.h"
 
-#if EFI_PRINTF_FUEL_DETAILS
-	bool printFuelDebug = false;
+#if EFI_PRINTF_FUEL_DETAILS || FUEL_MATH_EXTREME_LOGGING
+	bool printFuelDebug = true;
 #endif // EFI_PRINTF_FUEL_DETAILS
 
 #if EFI_ENGINE_CONTROL && EFI_SHAFT_POSITION_INPUT
@@ -260,7 +260,7 @@ static void handleFuel(efitick_t nowNt, float currentPhase, float nextPhase) {
 
 #if FUEL_MATH_EXTREME_LOGGING
 	if (printFuelDebug) {
-		efiPrintf("handleFuel [%.1f, %.1f) %d", currentPhase, nextPhase, getRevolutionCounter());
+		efiPrintf("handleFuel [%.1f, %.1f) %d", currentPhase, nextPhase, (uint16_t)getRevolutionCounter());
 	}
 #endif /* FUEL_MATH_EXTREME_LOGGING */
 
@@ -282,13 +282,13 @@ void mainTriggerCallback(uint32_t trgEventIndex, efitick_t edgeTimestamp, angle_
 	}
 
 	float rpm = engine->rpmCalculator.getCachedRpm();
-	if (rpm == 0) {
+  if (rpm == 0) {
 		// this happens while we just start cranking
 
 		// todo: check for 'trigger->is_synchnonized?'
 		return;
 	}
-
+  
 	if (trgEventIndex == 0) {
 
 		if (getTriggerCentral()->checkIfTriggerConfigChanged()) {
