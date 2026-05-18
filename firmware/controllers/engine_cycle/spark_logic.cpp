@@ -28,9 +28,9 @@ static const char *prevSparkName = nullptr;
 
 static void fireSparkBySettingPinLow(IgnitionEvent *event, IgnitionOutputPin *output) {
 #if SPARK_EXTREME_LOGGING
-	efiPrintf("[%s] %d spark goes low revolution %d tick %d current value %d",
-		event->getOutputForLoggins()->getName(), event->sparkCounter,
-		getRevolutionCounter(),  time2print(getTimeNowUs()),
+	efiPrintf("[%s] %d goes low; revolution %d, tick %d, current value %d",
+		event->getOutputForLoggins()->getName(), (uint16_t)event->sparkCounter,
+		(uint16_t)getRevolutionCounter(),  time2print(getTimeNowUs()),
 		output->currentLogicValue);
 #endif /* SPARK_EXTREME_LOGGING */
 
@@ -186,7 +186,7 @@ static void fireTrailingSpark(IgnitionOutputPin* pin) {
 static void overFireSparkAndPrepareNextSchedule(IgnitionEvent *event) {
 #if SPARK_EXTREME_LOGGING
 	efiPrintf("[%s] %d %s",
-		event->getOutputForLoggins()->getName(), event->sparkCounter,
+		event->getOutputForLoggins()->getName(), (uint16_t)event->sparkCounter,
 		__func__);
 #endif /* SPARK_EXTREME_LOGGING */
 	float actualDwellMs = event->actualDwellTimer.getElapsedSeconds() * 1e3;
@@ -298,10 +298,10 @@ static bool startDwellByTurningSparkPinHigh(IgnitionEvent *event, IgnitionOutput
 
 
 #if SPARK_EXTREME_LOGGING
-	efiPrintf("[%s] %d spark goes high revolution %d tick %d current value %d",
-		event->getOutputForLoggins()->getName(), event->sparkCounter,
-		getRevolutionCounter(), time2print(getTimeNowUs()),
-		output->currentLogicValue, event->sparkCounter);
+	efiPrintf("[%s] goes high; revolution %d, tick %d, current value %d, sparkCounter %d",
+		event->getOutputForLoggins()->getName(), 
+		(uint16_t)getRevolutionCounter(), time2print(getTimeNowUs()),
+		output->currentLogicValue, (uint16_t)event->sparkCounter);
 #endif /* SPARK_EXTREME_LOGGING */
 
 	// Reset error flag(s)
@@ -411,8 +411,8 @@ static void scheduleSparkEvent(bool limitedSpark, IgnitionEvent *event,
 	if (!limitedSpark) {
 #if SPARK_EXTREME_LOGGING
 		efiPrintf("[%s] %d sparkUp scheduling revolution %d angle %.1f (+%.1f) later",
-			event->getOutputForLoggins()->getName(), event->sparkCounter,
-			getRevolutionCounter(), dwellAngle, angleOffset);
+			event->getOutputForLoggins()->getName(), (uint16_t)event->sparkCounter,
+			(uint16_t)getRevolutionCounter(), dwellAngle, angleOffset);
 #endif /* SPARK_EXTREME_LOGGING */
 
 		/**
@@ -429,7 +429,7 @@ static void scheduleSparkEvent(bool limitedSpark, IgnitionEvent *event,
 #if SPARK_EXTREME_LOGGING
 		efitimeus_t chargeTimeUs = NT2US(chargeTime);
 		efiPrintf("[%s] %d sparkUp scheduled at %d ticks (%d.%06d)",
-			event->getOutputForLoggins()->getName(), event->sparkCounter,
+			event->getOutputForLoggins()->getName(), (uint16_t)event->sparkCounter,
 			time2print(chargeTime), time2print(chargeTimeUs / (1000 * 1000)), time2print(chargeTimeUs % (1000 * 1000)));
 #endif /* SPARK_EXTREME_LOGGING */
 
@@ -440,7 +440,7 @@ static void scheduleSparkEvent(bool limitedSpark, IgnitionEvent *event,
 
 #if SPARK_EXTREME_LOGGING
 		efiPrintf("[%s] %d sparkUp NOT scheduled because of limitedSpark",
-			event->getOutputForLoggins()->getName(), event->sparkCounter);
+			event->getOutputForLoggins()->getName(), (uint16_t)event->sparkCounter);
 #endif /* SPARK_EXTREME_LOGGING */
 	}
 
@@ -453,8 +453,8 @@ static void scheduleSparkEvent(bool limitedSpark, IgnitionEvent *event,
 
 #if SPARK_EXTREME_LOGGING
 	efiPrintf("[%s] %d sparkDown scheduling revolution %d angle %.1f",
-		event->getOutputForLoggins()->getName(), event->sparkCounter,
-		getRevolutionCounter(), sparkAngle);
+		event->getOutputForLoggins()->getName(), (uint16_t)event->sparkCounter,
+		(uint16_t)getRevolutionCounter(), sparkAngle);
 #endif /* FUEL_MATH_EXTREME_LOGGING */
 
 
@@ -466,7 +466,7 @@ static void scheduleSparkEvent(bool limitedSpark, IgnitionEvent *event,
 
 #if SPARK_EXTREME_LOGGING
 	efiPrintf("[%s] %d sparkDown scheduled %s",
-		event->getOutputForLoggins()->getName(), event->sparkCounter,
+		event->getOutputForLoggins()->getName(), (uint16_t)event->sparkCounter,
 		isTimeScheduled ? "later" : "to queue");
 #endif /* FUEL_MATH_EXTREME_LOGGING */
 
@@ -478,10 +478,10 @@ static void scheduleSparkEvent(bool limitedSpark, IgnitionEvent *event,
 			// auto fire spark at 1.5x nominal dwell
 			efitick_t fireTime = sumTickAndFloat(chargeTime, MSF2NT(1.5f * dwellMs));
 
-#if SPARK_EXTREME_LOGGING
+#if SPARK_EXTREME_LOGGING && 0
 			efitimeus_t fireTimeUs = NT2US(fireTime);
 			efiPrintf("[%s] %d overdwell scheduling at %d ticks (%d.%06d)",
-				event->getOutputForLoggins()->getName(), event->sparkCounter,
+				event->getOutputForLoggins()->getName(), (uint16_t)event->sparkCounter,
 				time2print(fireTime), time2print(fireTimeUs / (1000 * 1000)), time2print(fireTimeUs % (1000 * 1000)));
 #endif /* SPARK_EXTREME_LOGGING */
 
@@ -505,7 +505,7 @@ static void scheduleSparkEvent(bool limitedSpark, IgnitionEvent *event,
 		efiPrintf("spark dwell@ %.1f spark@ %.2f id=%d sparkCounter=%d", event->dwellAngle,
 			event->sparkEvent.getAngle(),
 			event->coilIndex,
-			event->sparkCounter);
+			(uint16_t)event->sparkCounter);
 	}
 #endif
 }
@@ -576,7 +576,9 @@ void onTriggerEventSparkLogic(float rpm, efitick_t edgeTimestamp, float currentP
 		prepareIgnitionSchedule();
 	}
 
-
+#if SPARK_EXTREME_LOGGING
+  efiPrintf("spark_logic.cpp: onTriggerEventSparkLogic: dwell=%f, ignitionEvents.isReady=%d", dwellMs, engine->ignitionEvents.isReady);
+#endif /* SPARK_EXTREME_LOGGING */
 	/**
 	 * Ignition schedule is defined once per revolution
 	 * See initializeIgnitionActions()
@@ -627,6 +629,10 @@ void onTriggerEventSparkLogic(float rpm, efitick_t edgeTimestamp, float currentP
 			if (!isOddCylWastedEvent && !isPhaseInRange(dwellAngle, currentPhase, nextPhase)) {
 				continue;
 			}
+#if SPARK_EXTREME_LOGGING
+      efiPrintf("spark_logic.cpp: onTriggerEventSparkLogic: PhaseInRange, dwellAngle=%f, currentPhase=%f, nextPhase=%f",
+        dwellAngle, currentPhase, nextPhase);
+#endif /* SPARK_EXTREME_LOGGING */
 
 			if (i == 0 && engineConfiguration->artificialTestMisfire && (getRevolutionCounter() % ((int)engineConfiguration->scriptSetting[5]) == 0)) {
 				// artificial misfire on cylinder #1 for testing purposes
@@ -668,6 +674,9 @@ void onTriggerEventSparkLogic(float rpm, efitick_t edgeTimestamp, float currentP
 #endif // EFI_ANTILAG_SYSTEM
 
 			scheduleSparkEvent(limitedSpark, event, rpm, dwellMs, dwellAngle, sparkAngle, edgeTimestamp, currentPhase, nextPhase);
+#if SPARK_EXTREME_LOGGING
+      efiPrintf("spark_logic.cpp: onTriggerEventSparkLogic: spark event scheduled for cylinder %d", event->cylinderIndex);
+#endif /* SPARK_EXTREME_LOGGING */      
 		}
 	}
 }
