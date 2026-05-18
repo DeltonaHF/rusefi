@@ -87,3 +87,4 @@ gcc-arm-none-eabi/
 java_tools/gcc_map_reader.jar
 firmware/bootloader/openblt_stm32f4_discovery.bin
 firmware/bootloader/openblt_stm32f4_discovery.hex
+gcc-arm-none-eabi/
