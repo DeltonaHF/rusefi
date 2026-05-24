@@ -374,6 +374,19 @@ static void setDefaultIdleOpenLoopParameters() {
   copyArray(config->iacLinBins, {0.0f,  6.5f, 25.0f, 50.0f, 75.0f, 87.5f, 94.0f, 100.0f});
   copyArray(config->iacLin,     {20.0f, 30.5f, 39.5f, 46.5f, 57.0f, 63.0f, 88.5f, 100.0f});
 
+  engineConfiguration->ignDiffCorrMode            = 0;    // disabled per default 
+  engineConfiguration->ignDiffCorrRpmMax          = 2100;   // 42 * 50 = 2100 RPM
+  engineConfiguration->ignDiffCorrPostStartRevs   = 26;   // 26 * 1  = 26 revolutions
+  engineConfiguration->ignDiffCorrMapDisableKpa   = 60;   // 60 * 1 = 60 kPa
+  engineConfiguration->ignDiffCorrMapRearmKpa     = 50;   // 50 * 1 = 50 kPa
+  engineConfiguration->ignDiffCorrMapRampRevs     = 60;   // 60 * 1  = 60 revolutions
+  engineConfiguration->ignDiffCorrOffIdleBand     = 100;  // 100 * 1 = 100 RPM
+  engineConfiguration->ignDiffCorrIdleDeadband    = 5;    // 5 * 1   = 5 RPM
+  engineConfiguration->ignDiffCorrIdleGain        = 0.32;   // 32 * 0.01 = 0.32 deg/RPM
+  engineConfiguration->ignDiffCorrIdleMax         = 1;    // 8 * 0.125 = 1.0 deg
+  engineConfiguration->ignDiffCorrOffIdleDeadband = 2;    // 2 * 1   = 2 RPM
+  engineConfiguration->ignDiffCorrOffIdleGain     = 0.96f;   // 96 * 0.01 = 0.96 deg/RPM
+  engineConfiguration->ignDiffCorrOffIdleMax      = 1.5f;   // 12 * 0.125 = 1.5 deg
 }
 
 /**

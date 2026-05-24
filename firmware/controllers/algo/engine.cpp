@@ -141,6 +141,15 @@ void Engine::updateTriggerConfiguration() {
 	if (!engine->triggerCentral.triggerShape.shapeDefinitionError) {
 		prepareOutputSignals();
 	}
+
+	// Set instant RPM delta window to one inter-cylinder angle.
+	// Each window spans engineCycle / cylindersCount / 2 degrees,
+	// which equals 90° for a 4-cylinder 4-stroke, 60° for a 6-cylinder, etc.
+	// Two consecutive windows together span one full cylinder spacing,
+	// cancelling compression/expansion speed variation.
+    	engine->triggerCentral.instantRpm.stepBack =
+        	engine->engineState.engineCycle / engineConfiguration->cylindersCount * 0.5f;
+
 #endif /* EFI_ENGINE_CONTROL && EFI_SHAFT_POSITION_INPUT */
 }
 

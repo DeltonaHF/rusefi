@@ -227,6 +227,8 @@ int16_t rpmAcceleration;dRPM;"RPM acceleration/Rate of Change/ROC",1, 0, 0, 5, 2
 	uint16_t turboSpeed;@@GAUGE_NAME_TURBO_SPEED@@;"hz",1, 0, 0, 0, 0
 
 	int16_t[MAX_CYLINDER_COUNT iterate] autoscale ignitionAdvanceCyl;Ign: Timing Cyl;"deg",{1/@@PACK_MULT_ANGLE@@}, 0, 0, 0, 1
+    	int8_t[MAX_CYLINDER_COUNT iterate] autoscale finalIgnAdvByCyl;Ign: Final timing Cyl;"deg", 0.5, 0, -63.5, 63.5, 1
+    	int8_t[MAX_CYLINDER_COUNT iterate] autoscale ignDiffCorrByCyl;Ign: D-term correction Cyl;"deg", 0.25, 0, -31.75, 31.75, 2
 
 ! fun fact: we have a separate pid_state.txt file for a bit of a different structure huh?
 	struct pid_status_s

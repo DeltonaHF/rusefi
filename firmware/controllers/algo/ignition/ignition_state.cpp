@@ -24,6 +24,7 @@
 #include "launch_control.h"
 #include "gppwm_channel.h"
 
+
 #if EFI_ENGINE_CONTROL
 
 static Map3D<TRACTION_CONTROL_ETB_DROP_SLIP_SIZE, TRACTION_CONTROL_ETB_DROP_SPEED_SIZE, int8_t, uint16_t, uint8_t> tcTimingDropTable{"tct"};
@@ -222,6 +223,117 @@ angle_t getAdvanceCorrections(float engineLoad) {
 		+ engine->ignitionState.cltTimingCorrection
 		+ engine->ignitionState.timingPidCorrection
 		- engine->ignitionState.dfcoTimingRetard;
+}
+
+// ── Ignition differential correction (D-term surge damper) ──────────────────
+// Active only at low RPM, low load, dynamic timing mode.
+// Rising RPM → retard; falling RPM → advance.
+// Computed fresh on every trigger tooth, latched per-cylinder at scheduling.
+
+static IgnDiffCorrMode evaluateIgnDiffCorrGate(uint32_t trgEventIndex) {
+    if (engineConfiguration->ignDiffCorrMode == 0) {
+      return IgnDiffCorrMode::Suppressed;
+    }
+  
+    // Fixed timing mode — correction not meaningful
+    if (engineConfiguration->timingMode != TM_DYNAMIC) {
+        return IgnDiffCorrMode::Suppressed;
+    }
+
+    // Post-start suppression
+    if (engine->rpmCalculator.getRevolutionCounterSinceStart() <
+            (uint32_t)engineConfiguration->ignDiffCorrPostStartRevs) {
+        return IgnDiffCorrMode::Suppressed;
+    }
+
+    float rpm    = engine->rpmCalculator.getCachedRpm();
+    float mapKpa = Sensor::getOrZero(SensorType::Map);
+
+    // RPM ceiling
+    if (rpm > engineConfiguration->ignDiffCorrRpmMax) {
+        return IgnDiffCorrMode::Suppressed;
+    }
+
+    // MAP authority gate with hysteresis and ramp-out
+    // Counter updated once per revolution
+    if (trgEventIndex == 0) {
+        if (mapKpa > (float)engineConfiguration->ignDiffCorrMapDisableKpa) {
+            if (engine->ignitionState.ignDiffCorrMapRampCount > 0) {
+                engine->ignitionState.ignDiffCorrMapRampCount--;
+            }
+        } else if (mapKpa < (float)engineConfiguration->ignDiffCorrMapRearmKpa) {
+            engine->ignitionState.ignDiffCorrMapRampCount =
+                engineConfiguration->ignDiffCorrMapRampRevs;
+        }
+    }
+
+    if (engine->ignitionState.ignDiffCorrMapRampCount == 0) {
+        return IgnDiffCorrMode::Suppressed;
+    }
+
+    // Idle vs off-idle gain set selection
+    auto tps = Sensor::get(SensorType::DriverThrottleIntent);
+    bool throttleOpen = tps &&
+        (tps.Value > engineConfiguration->idlePidDeactivationTpsThreshold);
+
+    if (throttleOpen || rpm > (float)engine->module<IdleController>()->idleTarget +
+               (float)engineConfiguration->ignDiffCorrOffIdleBand) {
+      if (engineConfiguration->ignDiffCorrMode < 2) {
+        return IgnDiffCorrMode::Suppressed;
+      }
+    return IgnDiffCorrMode::OffIdle;
+    }
+
+    return IgnDiffCorrMode::Idle;
+}
+
+static angle_t computeIgnDiffCorrValue(IgnDiffCorrMode mode, float dRpm) {
+    float deadband, gain, maxCorr;
+
+    if (mode == IgnDiffCorrMode::Idle) {
+        deadband = engineConfiguration->ignDiffCorrIdleDeadband;
+        gain     = engineConfiguration->ignDiffCorrIdleGain;
+        maxCorr  = engineConfiguration->ignDiffCorrIdleMax;
+    } else {
+        deadband = engineConfiguration->ignDiffCorrOffIdleDeadband;
+        gain     = engineConfiguration->ignDiffCorrOffIdleGain;
+        maxCorr  = engineConfiguration->ignDiffCorrOffIdleMax;
+    }
+
+    float absRpmDelta = std::abs(dRpm);
+
+    if (absRpmDelta < deadband) {
+        // Hold previous value — no step at dead-band boundary
+        return 0.0f;
+    }
+
+    float magnitude = std::min(gain * absRpmDelta, maxCorr);
+    return (dRpm > 0.0f) ? -magnitude : magnitude;
+}
+
+void IgnitionState::updateIgnDiffCorrection(uint32_t trgEventIndex) {
+    IgnDiffCorrMode mode = evaluateIgnDiffCorrGate(trgEventIndex);
+
+    if (mode == IgnDiffCorrMode::Suppressed) {
+        ignDiffCorrection = 0;
+        return;
+    }
+
+    float dRpm = getTriggerCentral()->instantRpm.dInstantRpm;
+    if (std::isnan(dRpm)) {
+        ignDiffCorrection = 0;
+        return;
+    }
+
+    angle_t corrDeg = computeIgnDiffCorrValue(mode, dRpm);
+    ignDiffCorrection = corrDeg; // store as 0.25 degree steps
+
+#if SPARK_EXTREME_LOGGING
+    efiPrintf("ignition_state.cpp: ignDiffCorr: mode=%d dRpm=%.1f corr=%.2f mapRamp=%d",
+        (int)mode, dRpm,
+        ignDiffCorrection,
+        (int)ignDiffCorrMapRampCount);
+#endif
 }
 
 /**

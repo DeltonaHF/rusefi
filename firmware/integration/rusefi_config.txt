@@ -1935,6 +1935,25 @@ end_struct
 
     rotational_idle_s rotationalIdleController;
 
+#define ignDiffCorrMode_enum "Disabled", "Idle only", "Idle and off-idle"
+custom ignDiffCorrMode_e 1 bits, U08, @OFFSET@, [0:1], @@ignDiffCorrMode_enum@@
+ignDiffCorrMode_e ignDiffCorrMode;D-term correction mod
+
+!uint8_t autoscale ignDiffCorrMode;D-term correction mode: 0=disabled 1=idle only 2=idle+off-idle;"enum", 1, 0, 0, 2, 0
+uint8_t autoscale ignDiffCorrRpmMax;RPM ceiling (50 RPM/bit);"RPM",50,0,0,12750,0
+uint8_t autoscale ignDiffCorrPostStartRevs;Post-start suppression;"revolutions",1,0,0,255,0
+uint8_t autoscale ignDiffCorrMapDisableKpa;MAP ramp-out threshold absolute;"kPa abs",1,0,0,255,0
+uint8_t autoscale ignDiffCorrMapRearmKpa;MAP re-arm threshold absolute;"kPa abs",1,0,0,255,0
+uint8_t autoscale ignDiffCorrMapRampRevs;MAP ramp-out duration;"revolutions",1,0,0,255,0
+uint8_t autoscale ignDiffCorrOffIdleBand;Off-idle RPM band above target;"RPM",1,0,0,255,0
+uint8_t autoscale ignDiffCorrIdleDeadband;Idle dRPM dead-band;"RPM",1,0,0,255,0
+uint8_t autoscale ignDiffCorrIdleGain;Idle gain (0.01 deg/RPM/bit);"deg/RPM",0.01,0,0,2.55,2
+uint8_t autoscale ignDiffCorrIdleMax;Idle max correction (0.125 deg/bit);"deg",0.125,0,0,31.875,2
+uint8_t autoscale ignDiffCorrOffIdleDeadband;Off-idle dRPM dead-band;"RPM",1,0,0,255,0
+uint8_t autoscale ignDiffCorrOffIdleGain;Off-idle gain (0.01 deg/RPM/bit);"deg/RPM",0.01,0,0,2.55,2
+uint8_t autoscale ignDiffCorrOffIdleMax;Off-idle max correction (0.125 deg/bit);"deg",0.125,0,0,31.875,2
+!uint8_t[3] ignDiffCorrPad;alignment padding;;,,,,
+
 ! historically 'unusedOftenChangesDuringFirmwareUpdate' was here - now that's just an anchor reminding where to insert new fields
 
 ! end of engine_configuration_s

@@ -46,9 +46,9 @@
  *   PC7             - Cam sensor (CAS)          (OEM ECU pin 23, 5 V)
  *
  * IGNITION OUTPUTS (3.3 V logic → TC4427 / smart coil driver):
- *   PC1             - Ignition 1  (OEM ECU pin 25)
  *   PC2             - Ignition 2  (OEM ECU pin 26)
  *   PC3             - Ignition 3
+ *   PC1             - Ignition 1  (OEM ECU pin 25)
  *   PC4             - Ignition 4
  *
  * INJECTOR OUTPUTS (low-side drivers):
@@ -132,9 +132,9 @@ static void rp_f405_boardDefaultConfiguration() {
     engineConfiguration->ignitionPinMode = OM_INVERTED;
     engineConfiguration->ignitionMode = IM_WASTED_SPARK;
     engineConfiguration->ignitionPins[0] = Gpio::C2;   // IGN1 (OEM pin 26)
-    engineConfiguration->ignitionPins[1] = Gpio::C1;   // IGN2 (OEM pin 25)
-    engineConfiguration->ignitionPins[2] = Gpio::C3;   // IGN3
-    engineConfiguration->ignitionPins[3] = Gpio::C4;   // IGN4
+    engineConfiguration->ignitionPins[1] = Gpio::Unassigned; //Gpio::C3;   // IGN3
+    engineConfiguration->ignitionPins[2] = Gpio::C1;   // IGN2 (OEM pin 25)
+    engineConfiguration->ignitionPins[3] = Gpio::Unassigned; //Gpio::C4;   // IGN4
 
     // === Injection outputs ===
     engineConfiguration->injectionPins[0] = Gpio::B10;  // INJ1 (OEM pin 35)
@@ -149,11 +149,18 @@ static void rp_f405_boardDefaultConfiguration() {
     // PA2 (EFI_ADC_2) = knock integrator — assigned via knock config, not here
     // PA3 (EFI_ADC_3) = CO-pot — assign to a GPPWM/aux input channel as needed
     engineConfiguration->iat.adcChannel       = EFI_ADC_4;   // PA4 - IAT
+    engineConfiguration->iat.useVoltageTable  = true;
+
     engineConfiguration->clt.adcChannel       = EFI_ADC_5;   // PA5 - CLT
+    engineConfiguration->clt.useVoltageTable  = true;
+
     // PA6 (EFI_ADC_6) = narrowband O2 — assign to o2Sensor1 channel as needed
     // PA7 (EFI_ADC_7) = auxiliary analog — assign as needed
     engineConfiguration->vbattAdcChannel      = EFI_ADC_10;  // PC0 - battery voltage
+    engineConfiguration->vbattDividerCoeff = 6.36; // todo: comment computation, e.g., (33 + 6.8) / 6.8; // 5.835
 
+    engineConfiguration->analogInputDividerCoefficient = 1.76f;
+ 
     // === Idle control ===
     // PB0 = IAC_PWM_OUT (OEM ECU pin 34); TIM3_CH3 available via AF2.
     engineConfiguration->idle.solenoidPin       = Gpio::B0;

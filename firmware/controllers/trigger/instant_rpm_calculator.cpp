@@ -17,7 +17,8 @@ InstantRpmCalculator::InstantRpmCalculator() :
 			//https://en.cppreference.com/w/cpp/language/zero_initialization
 			timeOfLastEvent()
 			, instantRpmValue()
-	{
+{
+  setArrayValues(indexOfPreviousEvent, (int16_t)-1);
 }
 
 void InstantRpmCalculator::movePreSynchTimestamps() {
@@ -65,10 +66,17 @@ float InstantRpmCalculator::calculateInstantRpm(
 	angle_t currentAngle = triggerFormDetails->eventAngles[current_index];
 	efiAssert(ObdCode::OBD_PCM_Processor_Fault, !std::isnan(currentAngle), "eventAngles", 0);
 
-	// Hunt for a tooth ~90 degrees ago to compare to the current time
+  // Hunt for a tooth backward - works good for even fire engines
+  angle_t previousAngle = currentAngle - stepBack;
+
+#if 0 // original RUSEFI code, ok for a 4 cylinder, more generic implementation is above
+  // Hunt for a tooth ~90 degrees ago to compare to the current time
 	angle_t previousAngle = currentAngle - 90;
+#endif
+
 	wrapAngle(previousAngle, "prevAngle", ObdCode::CUSTOM_ERR_TRIGGER_ANGLE_RANGE);
 	int prevIndex = triggerShape.findAngleIndex(triggerFormDetails, previousAngle);
+	indexOfPreviousEvent[current_index] = prevIndex;
 
 	// now let's get precise angle for that event
 	angle_t prevIndexAngle = triggerFormDetails->eventAngles[prevIndex];
@@ -113,6 +121,12 @@ float InstantRpmCalculator::calculateInstantRpm(
 	prevInstantRpmValue = instantRpm;
 
 	m_instantRpmRatio = instantRpm / instantRpmValue[prevIndex];
+
+  //now the difference between current and previous window RPM can be calculated
+  uint16_t prevprevIndex = indexOfPreviousEvent[prevIndex];
+  if (prevprevIndex != (uint16_t)-1) {
+    dInstantRpm = instantRpm - instantRpmValue[prevprevIndex];
+  }
 
 	return instantRpm;
 }

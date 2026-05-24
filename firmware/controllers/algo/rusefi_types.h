@@ -56,6 +56,8 @@ using angle_t = float;
 
 using engineSyncCam_e = uint8_t;
 
+using ignDiffCorrMode_e = uint8_t;
+
 // mass in grams
 using mass_t = float;
 

@@ -118,7 +118,14 @@ static void prepareCylinderIgnitionSchedule(angle_t dwellAngleDuration, floatms_
 	finalIgnitionTiming = clampF(engineConfiguration->minimumIgnitionTiming, finalIgnitionTiming, engineConfiguration->maximumIgnitionTiming);
 	*/
 
-    engine->outputChannels.ignitionAdvanceCyl[event->cylinderIndex] = finalIgnitionTiming;
+    // Apply D-term correction fresh at scheduling time
+  float diffCorrDeg = engine->ignitionState.ignDiffCorrection;
+  engine->outputChannels.ignitionAdvanceCyl[event->cylinderIndex] = finalIgnitionTiming;
+
+  finalIgnitionTiming += diffCorrDeg;
+
+  engine->outputChannels.ignDiffCorrByCyl[event->cylinderIndex] = diffCorrDeg;
+  engine->outputChannels.finalIgnAdvByCyl[event->cylinderIndex] = finalIgnitionTiming;
 
 	angle_t sparkAngle =
 		// Negate because timing *before* TDC, and we schedule *after* TDC
@@ -553,7 +560,7 @@ static void prepareIgnitionSchedule() {
 	initializeIgnitionActions();
 }
 
-void onTriggerEventSparkLogic(float rpm, efitick_t edgeTimestamp, float currentPhase, float nextPhase) {
+void onTriggerEventSparkLogic(uint32_t trgEventIndex, float rpm, efitick_t edgeTimestamp, float currentPhase, float nextPhase) {
 	ScopePerf perf(PE::OnTriggerEventSparkLogic);
 
 	if (!engineConfiguration->isIgnitionEnabled) {
@@ -594,6 +601,7 @@ void onTriggerEventSparkLogic(float rpm, efitick_t edgeTimestamp, float currentP
 		&& getCurrentIgnitionMode() == IM_WASTED_SPARK;
 
 	if (engine->ignitionEvents.isReady) {
+    engine->ignitionState.updateIgnDiffCorrection(trgEventIndex);
 		for (size_t i = 0; i < engineConfiguration->cylindersCount; i++) {
 			IgnitionEvent *event = &engine->ignitionEvents.elements[i];
 
