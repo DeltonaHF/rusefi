@@ -37,18 +37,17 @@ void TriggerScheduler::schedule(const char *msg, AngleBasedEvent* event, angle_t
 /**
  * Schedules 'action' to occur at engine cycle angle 'angle'.
  *
- * @return true if event corresponds to current tooth and was time-based scheduler
- *         false if event was put into queue for scheduling at a later tooth
+ * @return scheduled event tick - if event corresponds to current tooth and was time-based scheduler
+ *         -1 - if event was put into queue for scheduling at a later tooth
  */
-bool TriggerScheduler::scheduleOrQueue(const char *msg, AngleBasedEvent *event,
+efitick_t TriggerScheduler::scheduleOrQueue(const char *msg, AngleBasedEvent *event,
 		efitick_t edgeTimestamp,
 		angle_t angle,
 		action_s action,
 		float currentPhase, float nextPhase) {
 	event->setAngle(angle);
 
-  float oneDegreeUs = getEngineRotationState()->getOneDegreeUs();
-  float lookaheadAngle = SCHEDULE_LOOKAHEAD_US / oneDegreeUs;
+  float lookaheadAngle = SCHEDULE_LOOKAHEAD_US * engine->rpmCalculator.oneUsDegrees;
 
   float lookaheadNext = nextPhase + lookaheadAngle;
   if (lookaheadNext >= engine->engineState.engineCycle)
@@ -57,19 +56,19 @@ bool TriggerScheduler::scheduleOrQueue(const char *msg, AngleBasedEvent *event,
     // *kludge* naming mess: if (shouldSchedule) { scheduleByAngle } else { schedule } see header for more details
 	if (event->shouldSchedule(currentPhase, lookaheadNext)) {
 		// if we're due now, just schedule the event
-		scheduleByAngle(
+		return scheduleByAngle(
 			&event->eventScheduling,
 			edgeTimestamp,
 			event->getAngleFromNow(currentPhase),
 			action
 		);
 
-		return true;
+//		return true;
 	} else {
 		// If not due now, add it to the queue to be scheduled later
 		schedule(msg, event, action);
 
-		return false;
+		return -1;
 	}
 }
 
@@ -120,8 +119,7 @@ void TriggerScheduler::scheduleEventsUntilNextTriggerTooth(float rpm,
 		m_angleBasedEventsHead = nullptr;
 	}
 
-  float oneDegreeUs = getEngineRotationState()->getOneDegreeUs();
-  float lookaheadAngle = SCHEDULE_LOOKAHEAD_US / oneDegreeUs;
+  float lookaheadAngle = SCHEDULE_LOOKAHEAD_US * engine->rpmCalculator.oneUsDegrees;
 //  lookaheadAngle = 15.0f; // for testing purposes
 
   float lookaheadNext = nextPhase + lookaheadAngle;  

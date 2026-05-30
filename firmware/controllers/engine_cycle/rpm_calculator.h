@@ -121,6 +121,12 @@ public:
 	 */
 	floatus_t oneDegreeUs = NAN;
 
+	/**
+	 * This is a performance optimization: avoid multiple division in spark logic, replacing it with multiplication by pre-calculated value.
+	 * 0 while engine is not spinning
+	 */
+  float oneUsDegrees = NAN;
+
 	floatus_t getOneDegreeUs() override {
 		return oneDegreeUs;
 	}

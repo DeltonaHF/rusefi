@@ -1168,6 +1168,9 @@ void TriggerCentral::handleShaftSignal(trigger_event_e signal, efitick_t timesta
           float estimatedRpm = 60.0f / (toothPeriodSeconds * 4.0f);
 
           engine->rpmCalculator.assignRpmValue(estimatedRpm);
+          engine->triggerCentral.instantRpm.m_instantRpm = estimatedRpm;	
+          engine->triggerCentral.instantRpm.prevInstantRpmValue = estimatedRpm;
+          engine->triggerCentral.instantRpm.predictedRpm = estimatedRpm;
 
           efiPrintf("Combined pattern sync: estimated initial RPM=%.1f based on tooth period of %.2f ms", estimatedRpm, toothPeriodSeconds * 1000);
         }

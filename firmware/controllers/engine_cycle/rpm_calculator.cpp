@@ -143,9 +143,16 @@ void RpmCalculator::assignRpmValue(float floatRpmValue) {
 	setValidValue(floatRpmValue, 0);	// 0 for current time since RPM sensor never times out
 	if (cachedRpmValue <= 0) {
 		oneDegreeUs = NAN;
+    oneUsDegrees = 0;
 	} else {
 		// here it's really important to have more precise float RPM value, see #796
-		oneDegreeUs = getOneDegreeTimeUs(floatRpmValue);
+    float rpm = engine->triggerCentral.instantRpm.predictedRpm;
+    if (rpm > 0) {
+      oneDegreeUs = getOneDegreeTimeUs(rpm);
+    } else {
+      oneDegreeUs = getOneDegreeTimeUs(floatRpmValue);
+    }
+    oneUsDegrees = 1.0f / oneDegreeUs;
 		if (previousRpmValue == 0) {
 			/**
 			 * this would make sure that we have good numbers for first cranking revolution
@@ -261,9 +268,17 @@ void RpmCalculator::setSpinningUp(efitick_t nowNt) {
 void rpmShaftPositionCallback(trigger_event_e ckpSignalType,
 		uint32_t trgEventIndex, efitick_t nowNt) {
 
-	bool alwaysInstantRpm = engineConfiguration->alwaysInstantRpm;
+  bool alwaysInstantRpm = engineConfiguration->alwaysInstantRpm;
 
 	RpmCalculator *rpmState = &engine->rpmCalculator;
+
+#if 0
+		efiPrintf("rpm_calculator.cpp: rpmShaftPositionCallback: updateInstantRpm: idx=%d; sig=%d; iRPM=%d; RPM=%d", 
+      (uint16_t)trgEventIndex, 
+      ckpSignalType, 
+      (uint16_t)engine->triggerCentral.instantRpm.m_instantRpm, 
+      (uint16_t)rpmState->getCachedRpm());
+#endif
 
 	if (trgEventIndex == 0) {
 		if (HAVE_CAM_INPUT()) {
@@ -309,13 +324,19 @@ void rpmShaftPositionCallback(trigger_event_e ckpSignalType,
 
 
 	// Always update instant RPM even when not spinning up
-	engine->triggerCentral.instantRpm.updateInstantRpm(
-			engine->triggerCentral.triggerState.currentCycle.current_index,
 
+  engine->triggerCentral.instantRpm.updateInstantRpm(
+		engine->triggerCentral.triggerState.currentCycle.current_index,
 		engine->triggerCentral.triggerShape, &engine->triggerCentral.triggerFormDetails,
 		trgEventIndex, nowNt);
 
-	float instantRpm = engine->triggerCentral.instantRpm.getInstantRpm();
+  float rpm = engine->triggerCentral.instantRpm.predictedRpm;
+  if (rpm > 0) {
+    engine->rpmCalculator.oneDegreeUs = getOneDegreeTimeUs(rpm);
+    engine->rpmCalculator.oneUsDegrees = 1.0f / engine->rpmCalculator.oneDegreeUs;
+  }
+  
+	float instantRpm = engine->triggerCentral.instantRpm.m_instantRpm;
 	if (alwaysInstantRpm) {
 		rpmState->setRpmValue(instantRpm);
 	} else if (rpmState->isSpinningUp()) {

@@ -661,7 +661,9 @@ void updateTunerStudioState() {
 
 	tsOutputChannels->RPMValue = rpm;
 #if EFI_SHAFT_POSITION_INPUT
-	tsOutputChannels->instantRpm = engine->triggerCentral.instantRpm.getInstantRpm();
+	tsOutputChannels->instantRpm = engine->triggerCentral.instantRpm.m_instantRpm;
+  tsOutputChannels->predictedRpm = engine->triggerCentral.instantRpm.predictedRpm;
+  tsOutputChannels->dInstantRpm = engine->triggerCentral.instantRpm.dInstantRpm;
 	tsOutputChannels->totalTriggerErrorCounter = engine->triggerCentral.triggerState.totalTriggerErrorCounter;
 	tsOutputChannels->rpmAcceleration = engine->rpmCalculator.getRpmAcceleration();
 

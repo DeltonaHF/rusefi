@@ -9,7 +9,7 @@ public:
 	void schedule(const char *msg, AngleBasedEvent* event, angle_t angle, action_s const& action);
 
     // 'schedule' means 'delegates to time-based scheduler' and 'queue' here matches the 'schedule' method above
-	bool scheduleOrQueue(const char *msg, AngleBasedEvent *event,
+	efitick_t scheduleOrQueue(const char *msg, AngleBasedEvent *event,
 			     efitick_t edgeTimestamp,
 			     angle_t angle,
 			     action_s action,

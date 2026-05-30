@@ -124,8 +124,10 @@ float InstantRpmCalculator::calculateInstantRpm(
 
   //now the difference between current and previous window RPM can be calculated
   uint16_t prevprevIndex = indexOfPreviousEvent[prevIndex];
+  
   if (prevprevIndex != (uint16_t)-1) {
     dInstantRpm = instantRpm - instantRpmValue[prevprevIndex];
+    predictedRpm = instantRpmValue[prevIndex] + dInstantRpm;
   }
 
 	return instantRpm;

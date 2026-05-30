@@ -29,10 +29,13 @@ public:
 	void resetInstantRpm() {
 		setArrayValues(timeOfLastEvent, 0);
 		setArrayValues(spinningEvents, 0);
+		setArrayValues(instantRpmValue, 0);
+
 		spinningEventIndex = 0;
 		prevInstantRpmValue = 0;
 		dInstantRpm = NAN;
 		m_instantRpm = 0;
+    predictedRpm = 0;
 		setArrayValues(indexOfPreviousEvent, (uint16_t)-1);
 	}
 
@@ -66,7 +69,7 @@ public:
 	 * difference between current instant RPM and previous instant RPM
 	 */
 	float dInstantRpm = NAN;
-
+  float predictedRpm = 0;
 
 	float m_instantRpm = 0;
   angle_t stepBack = 90; // degrees, will get set to an engine specific value by updateTriggerConfiguration()

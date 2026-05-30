@@ -325,8 +325,8 @@ void IgnitionState::updateIgnDiffCorrection(uint32_t trgEventIndex) {
         return;
     }
 
-    angle_t corrDeg = computeIgnDiffCorrValue(mode, dRpm);
-    ignDiffCorrection = corrDeg; // store as 0.25 degree steps
+    ignDiffCorrection = computeIgnDiffCorrValue(mode, dRpm);
+    
 
 #if SPARK_EXTREME_LOGGING
     efiPrintf("ignition_state.cpp: ignDiffCorr: mode=%d dRpm=%.1f corr=%.2f mapRamp=%d",
