@@ -53,8 +53,8 @@
  *
  * INJECTOR OUTPUTS (low-side drivers):
  *   PB10            - Injector 1  (OEM ECU pin 35)
- *   PB11            - Injector 2  (OEM ECU pin 32)
- *   PB15            - Injector 3  (OEM ECU pin 33)
+ *   PB15            - Injector 2  (OEM ECU pin 32)
+ *   PB11            - Injector 3  (OEM ECU pin 33)
  *   PB12            - Injector 4  (OEM ECU pin 18)
  *
  * PWM / LOW-SIDE OUTPUTS:
@@ -124,7 +124,7 @@ static void rp_f405_boardDefaultConfiguration() {
     engineConfiguration->triggerInputPins[1] = Gpio::Unassigned; // cam — enable when fitted
 
     // === Vehicle speed sensor ===
-    engineConfiguration->vehicleSpeedSensorInputPin = Gpio::B13;
+    engineConfiguration->vehicleSpeedSensorInputPin = Gpio::B4; // PB4 = OEM ECU pin 8
 
     // === Ignition outputs ===
     // 3.3 V logic outputs; coil drivers 

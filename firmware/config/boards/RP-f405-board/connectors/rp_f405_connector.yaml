@@ -97,8 +97,14 @@ pins:
   - pin: vss
     id: B13
     class: event_inputs
-    ts_name: PB13 VSS
-    function: Vehicle speed sensor input, 3.3 V (VSS_3V3_D_IN)
+    ts_name: PB13 Hall Vss
+    function: Vehicle speed sensor input (VSS_3V3_D_IN)
+
+  - pin: 8
+    id: B4
+    class: event_inputs
+    ts_name: PB4 Aux Input (OEM pin 8)
+    function: Hall sensor input (AuxSwt_5V_D_IN)
 
   # -- DIGITAL INPUTS (id: brain_input_pin_e, P prefix) ---------------------
 
@@ -111,8 +117,8 @@ pins:
   - pin: 8
     id: B4
     class: switch_inputs
-    ts_name: PB4 Aux Switch 1 (OEM pin 8)
-    function: Auxiliary switch digital input, 5 V tolerant (AuxSwt_5V_D_IN)
+    ts_name: PB4 Aux Input (OEM pin 8)
+    function: Auxiliary switch digital input (AuxSwt_5V_D_IN)
 
   - pin: 14
     id: B14
