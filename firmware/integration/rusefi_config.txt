@@ -324,7 +324,8 @@ struct stft_s
 	uint8_t autoscale minAfr;Below this AFR, correction is paused;"afr", 0.1, 0, 10, 20, 1
 	uint8_t autoscale maxAfr;Above this AFR, correction is paused;"afr", 0.1, 0, 10, 20, 1
 	uint8_t startupDelay;Time after startup before closed loop operation is allowed.;"seconds", 1, 0, 0, 250, 0
-
+	uint8_t autoscale deltaLambdaActivityThrsh;Lambda activity detection threshold. Delta between consecutive smoothed lambda readings required to count as a crossing. Set in native sensor units (lambda or AFR depending on sensor type).;"", 0.02, 0, 0, 5.1, 2
+	uint8_t cntLambdaActivityThrsh;Number of threshold crossings required before lambda sensor is considered ready for closed loop. Prevents false enable during cranking transients.;"count", 1, 0, 0, 255, 0
 	stft_cell_cfg_s[STFT_CELL_COUNT iterate] cellCfgs;
 end_struct
 

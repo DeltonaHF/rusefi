@@ -70,9 +70,16 @@ stft_state_e ShortTermFuelTrim::getCorrectionState() {
 }
 
 stft_state_e ShortTermFuelTrim::getLearningState(SensorType sensor) {
+    // Find bank index for this sensor to check its activity monitor
+    size_t bankIdx = (sensor == SensorType::Lambda2) ? 1 : 0;
+    if (!lambdaActivity[bankIdx].isReady()) {
+        return stftDisabledLambdaSensorNotReady;
+    }
+
 	const auto& cfg = engineConfiguration->stft;
 
 	// TODO: add check for stftLearningDisabledSettings
+
 
 	// Pause (but don't reset) correction if the AFR is off scale.
 	// It's probably a transient and poorly tuned transient correction
@@ -112,6 +119,10 @@ void ShortTermFuelTrim::init(stft_s *stftCfg) {
 
 			cell.configure(&stftCfg->cellCfgs[bin], sensor);
 		}
+        lambdaActivity[bank].configure(
+            stftCfg->deltaLambdaActivityThrsh,  
+            stftCfg->cntLambdaActivityThrsh);
+
 	}
 }
 
@@ -148,7 +159,22 @@ ClosedLoopFuelResult ShortTermFuelTrim::getCorrection(float rpm, float fuelLoad)
 }
 
 void ShortTermFuelTrim::onSlowCallback() {
-	// Do some magic math here?
+    bool running = engine->rpmCalculator.isRunning();
+    for (size_t bank = 0; bank < FT_BANK_COUNT; bank++) {
+        if (!running) {
+            lambdaActivity[bank].reset();
+        } else {
+            // SmoothedLambda1/2 map to bank 0/1 via getSensorForBankIndex
+            // Use SmoothedLambda variants - filtering already done in ego.cpp
+            SensorType smoothedType = (bank == 0)
+                ? SensorType::SmoothedLambda1
+                : SensorType::SmoothedLambda2;
+            auto val = Sensor::get(smoothedType);
+            if (val.Valid) {
+                lambdaActivity[bank].feed(val.Value);
+            }
+        }
+    }
 }
 
 bool ShortTermFuelTrim::needsDelayedShutoff() {

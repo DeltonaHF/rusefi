@@ -8,6 +8,44 @@
 
 struct stft_s;
 
+
+struct LambdaActivityMonitor {
+    void feed(float smoothedLambda) {
+        if (!m_ready) {
+            if (m_initialized && absF(smoothedLambda - m_lastValue) > m_threshold) {
+                m_crossingCount++;
+                if (m_crossingCount >= m_requiredCrossings) {
+                    m_ready = true;
+                }
+            }
+            m_lastValue = smoothedLambda;
+            m_initialized = true;
+        }
+    }
+
+    void configure(float threshold, uint8_t requiredCrossings) {
+        m_threshold = threshold;
+        m_requiredCrossings = requiredCrossings;
+    }
+
+    bool isReady() const { return m_ready; }
+
+    void reset() {
+        m_ready = false;
+        m_initialized = false;
+        m_crossingCount = 0;
+        m_lastValue = 0;
+    }
+
+private:
+    float m_threshold = 0.05f;
+    float m_lastValue = 0;
+    uint8_t m_requiredCrossings = 5;
+    uint8_t m_crossingCount = 0;
+    bool m_ready = false;
+    bool m_initialized = false;
+};
+
 struct ClosedLoopFuelResult {
 	ClosedLoopFuelResult() {
 		// Default is no correction, aka 1.0 multiplier
@@ -38,6 +76,7 @@ public:
 private:
 #endif
 	FuelingBank banks[FT_BANK_COUNT];
+	LambdaActivityMonitor lambdaActivity[FT_BANK_COUNT];
 
 	Deadband<25> idleDeadband;
 	Deadband<2> overrunDeadband;
