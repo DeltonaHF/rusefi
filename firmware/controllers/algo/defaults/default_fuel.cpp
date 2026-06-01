@@ -162,6 +162,8 @@ static void setDefaultStftSettings() {
 
 	// 60 second startup delay - some O2 sensors are slow to warm up.
 	cfg.startupDelay = 60;
+	cfg.deltaLambdaActivityThrsh = 0.05f;
+	cfg.cntLambdaActivityThrsh = 3;	
 
 	// Only correct in [12.0, 17.0]
 	cfg.minAfr = 12;

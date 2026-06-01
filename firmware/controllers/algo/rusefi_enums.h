@@ -884,11 +884,12 @@ typedef enum __attribute__ ((__packed__)) {
 	stftDisabledRPM = 3,
 	stftDisabledCrankingDelay = 4,
 	stftDisabledClt = 5,
+	stftDisabledLambdaSensorNotReady = 6,
 	// below state related to learning only
-	stftDisabledAfrOurOfRange = 6,
-	stftDisabledDFCO = 7,
-	stftDisabledTpsAccel = 8,
-	stftDisabledFuelCut = 9
+	stftDisabledAfrOurOfRange = 7,
+	stftDisabledDFCO = 8,
+	stftDisabledTpsAccel = 9,
+	stftDisabledFuelCut = 10
 } stft_state_e;
 
 typedef enum __attribute__((__packed__)) {
